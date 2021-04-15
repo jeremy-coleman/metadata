@@ -1,17 +1,15 @@
 import path from 'path';
-import { create } from 'babel-test';
+import { createTests } from './shared';
 
-import { toMatchFile } from 'jest-file-snapshot';
-expect.extend({ toMatchFile });
-
-const { fixtures } = create({
+const { fixtures } = createTests({
   presets: [['@babel/preset-typescript', { allExtensions: true }]],
   plugins: [
     require.resolve('../src/plugin'),
-    ['@babel/plugin-proposal-decorators', { legacy: true }],
+    // ['@babel/plugin-proposal-decorators', { legacy: true }],
+    '@babel/plugin-syntax-decorators',
     ['@babel/plugin-proposal-class-properties', { loose: true }],
-    '@babel/plugin-transform-modules-commonjs'
-  ]
+    '@babel/plugin-transform-modules-commonjs',
+  ],
 });
 
 fixtures('emit metadata', path.join(__dirname, '__modules__'));
