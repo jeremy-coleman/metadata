@@ -198,6 +198,7 @@ export function create({
       };
     } catch (e) {
       if (fs.existsSync(output)) {
+        console.error(e);
         throw new TestError(
           chalk.white(
             `The test previously passed, but failed with an error for this run.\n\nIf this is expected, remove the file ${chalk.blue(

@@ -1,196 +1,105 @@
-import _applyDecoratedDescriptor from '@babel/runtime/helpers/applyDecoratedDescriptor';
-
-var _dec,
-  _dec2,
-  _dec3,
-  _class,
-  _dec4,
-  _dec5,
-  _dec6,
-  _dec7,
-  _dec8,
-  _dec9,
-  _dec10,
-  _dec11,
-  _dec12,
-  _dec13,
-  _dec14,
-  _dec15,
-  _dec16,
-  _dec17,
-  _dec18,
-  _class2,
-  _class3,
-  _dec19,
-  _dec20,
-  _dec21,
-  _dec22,
-  _dec23,
-  _dec24,
-  _dec25,
-  _dec26,
-  _class4,
-  _class5;
-
 class Injected {}
 
-let MyClass =
-  ((_dec = function (target, key) {
-    return inject()(target, undefined, 0);
-  }),
-  (_dec2 = Reflect.metadata('design:type', Function)),
-  (_dec3 = Reflect.metadata('design:paramtypes', [
-    typeof Injected === 'undefined' ? Object : Injected,
-  ])),
-  _dec(
-    (_class =
-      _dec2(
-        (_class =
-          _dec3(
-            (_class = class MyClass {
-              constructor(parameter) {}
-            })
-          ) || _class)
-      ) || _class)
-  ) || _class);
-let MyOtherClass =
-  ((_dec4 = function (target, key) {
-    return inject()(target, undefined, 0);
-  }),
-  (_dec5 = function (target, key) {
-    return inject('KIND')(target, undefined, 1);
-  }),
-  (_dec6 = Reflect.metadata('design:type', Function)),
-  (_dec7 = Reflect.metadata('design:paramtypes', [
-    typeof Injected === 'undefined' ? Object : Injected,
-    typeof Injected === 'undefined' ? Object : Injected,
-  ])),
-  (_dec8 = function (target, key) {
-    return demo()(target, key, 0);
-  }),
-  (_dec9 = Reflect.metadata('design:type', Function)),
-  (_dec10 = Reflect.metadata('design:paramtypes', [String, void 0])),
-  (_dec11 = decorate('named')),
-  (_dec12 = function (target, key) {
-    return inject()(target, key, 0);
-  }),
-  (_dec13 = function (target, key) {
-    return arg()(target, key, 1);
-  }),
-  (_dec14 = Reflect.metadata('design:type', Function)),
-  (_dec15 = Reflect.metadata('design:paramtypes', [
+@_dec
+@Reflect.metadata('design:type', Function)
+@Reflect.metadata('design:paramtypes', [
+  typeof Injected === 'undefined' ? Object : Injected,
+])
+class MyClass {
+  constructor(parameter) {}
+}
+
+@_dec2
+@_dec3
+@Reflect.metadata('design:type', Function)
+@Reflect.metadata('design:paramtypes', [
+  typeof Injected === 'undefined' ? Object : Injected,
+  typeof Injected === 'undefined' ? Object : Injected,
+])
+class MyOtherClass {
+  constructor(parameter, otherParam) {
+    this.parameter = parameter;
+  }
+
+  @_dec4
+  @Reflect.metadata('design:type', Function)
+  @Reflect.metadata('design:paramtypes', [String, void 0])
+  methodUndecorated(param, otherParam) {}
+
+  @decorate('named')
+  @_dec5
+  @_dec6
+  @Reflect.metadata('design:type', Function)
+  @Reflect.metadata('design:paramtypes', [
     typeof Injected === 'undefined' ? Object : Injected,
     typeof Schema === 'undefined' ? Object : Schema,
-  ])),
-  (_dec16 = function (target, key) {
-    return argObjectSpread()(target, key, 0);
-  }),
-  (_dec17 = Reflect.metadata('design:type', Function)),
-  (_dec18 = Reflect.metadata('design:paramtypes', [
+  ])
+  method(param, schema) {}
+
+  @_dec7
+  @Reflect.metadata('design:type', Function)
+  @Reflect.metadata('design:paramtypes', [
     typeof SchemaObjectSpread === 'undefined' ? Object : SchemaObjectSpread,
-  ])),
-  _dec4(
-    (_class2 =
-      _dec5(
-        (_class2 =
-          _dec6(
-            (_class2 =
-              _dec7(
-                (_class2 =
-                  ((_class3 = class MyOtherClass {
-                    constructor(parameter, otherParam) {
-                      this.parameter = parameter;
-                    }
+  ])
+  methodWithObjectSpread({ name }) {}
+}
 
-                    methodUndecorated(param, otherParam) {}
+@Decorate
+@_dec8
+@_dec9
+@Reflect.metadata('design:type', Function)
+@Reflect.metadata('design:paramtypes', [
+  typeof Injected === 'undefined' ? Object : Injected,
+  typeof Injected === 'undefined' ? Object : Injected,
+])
+class DecoratedClass {
+  constructor(module, otherModule) {
+    this.module = module;
+  }
 
-                    method(param, schema) {}
+  @decorate('example')
+  @_dec10
+  @Reflect.metadata('design:type', Function)
+  @Reflect.metadata('design:paramtypes', [String])
+  method(param) {}
+}
 
-                    methodWithObjectSpread({ name }) {}
-                  }),
-                  (_applyDecoratedDescriptor(
-                    _class3.prototype,
-                    'methodUndecorated',
-                    [_dec8, _dec9, _dec10],
-                    Object.getOwnPropertyDescriptor(
-                      _class3.prototype,
-                      'methodUndecorated'
-                    ),
-                    _class3.prototype
-                  ),
-                  _applyDecoratedDescriptor(
-                    _class3.prototype,
-                    'method',
-                    [_dec11, _dec12, _dec13, _dec14, _dec15],
-                    Object.getOwnPropertyDescriptor(
-                      _class3.prototype,
-                      'method'
-                    ),
-                    _class3.prototype
-                  ),
-                  _applyDecoratedDescriptor(
-                    _class3.prototype,
-                    'methodWithObjectSpread',
-                    [_dec16, _dec17, _dec18],
-                    Object.getOwnPropertyDescriptor(
-                      _class3.prototype,
-                      'methodWithObjectSpread'
-                    ),
-                    _class3.prototype
-                  )),
-                  _class3))
-              ) || _class2)
-          ) || _class2)
-      ) || _class2)
-  ) || _class2);
-let DecoratedClass =
-  ((_dec19 = function (target, key) {
-    return inject()(target, undefined, 0);
-  }),
-  (_dec20 = function (target, key) {
-    return inject()(target, undefined, 1);
-  }),
-  (_dec21 = Reflect.metadata('design:type', Function)),
-  (_dec22 = Reflect.metadata('design:paramtypes', [
-    typeof Injected === 'undefined' ? Object : Injected,
-    typeof Injected === 'undefined' ? Object : Injected,
-  ])),
-  (_dec23 = decorate('example')),
-  (_dec24 = function (target, key) {
-    return inject()(target, key, 0);
-  }),
-  (_dec25 = Reflect.metadata('design:type', Function)),
-  (_dec26 = Reflect.metadata('design:paramtypes', [String])),
-  Decorate(
-    (_class4 =
-      _dec19(
-        (_class4 =
-          _dec20(
-            (_class4 =
-              _dec21(
-                (_class4 =
-                  _dec22(
-                    (_class4 =
-                      ((_class5 = class DecoratedClass {
-                        constructor(module, otherModule) {
-                          this.module = module;
-                        }
+function _dec(target, key) {
+  return inject()(target, undefined, 0);
+}
 
-                        method(param) {}
-                      }),
-                      _applyDecoratedDescriptor(
-                        _class5.prototype,
-                        'method',
-                        [_dec23, _dec24, _dec25, _dec26],
-                        Object.getOwnPropertyDescriptor(
-                          _class5.prototype,
-                          'method'
-                        ),
-                        _class5.prototype
-                      ),
-                      _class5))
-                  ) || _class4)
-              ) || _class4)
-          ) || _class4)
-      ) || _class4)
-  ) || _class4);
+function _dec2(target, key) {
+  return inject()(target, undefined, 0);
+}
+
+function _dec3(target, key) {
+  return inject('KIND')(target, undefined, 1);
+}
+
+function _dec4(target, key) {
+  return demo()(target, key, 0);
+}
+
+function _dec5(target, key) {
+  return inject()(target, key, 0);
+}
+
+function _dec6(target, key) {
+  return arg()(target, key, 1);
+}
+
+function _dec7(target, key) {
+  return argObjectSpread()(target, key, 0);
+}
+
+function _dec8(target, key) {
+  return inject()(target, undefined, 0);
+}
+
+function _dec9(target, key) {
+  return inject()(target, undefined, 1);
+}
+
+function _dec10(target, key) {
+  return inject()(target, key, 0);
+}

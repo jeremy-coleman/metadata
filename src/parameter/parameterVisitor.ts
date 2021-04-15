@@ -21,23 +21,27 @@ import { types as t } from '@babel/core';
 function createParamDecorator(
   paramIndex: number,
   decoratorExpression: t.Expression,
-  isConstructor: boolean = false
+  isConstructor: boolean = false,
+  statementParent: NodePath<t.Statement>
 ) {
-  return t.decorator(
-    t.functionExpression(
-      null, // anonymous function
+  const id = statementParent.scope.generateUidIdentifier('dec');
+  (statementParent.container as any[]).push(
+    t.functionDeclaration(
+      id,
       [t.identifier('target'), t.identifier('key')],
       t.blockStatement([
         t.returnStatement(
           t.callExpression(decoratorExpression, [
             t.identifier('target'),
             t.identifier(isConstructor ? 'undefined' : 'key'),
-            t.numericLiteral(paramIndex)
+            t.numericLiteral(paramIndex),
           ])
-        )
+        ),
       ])
     )
   );
+
+  return t.decorator(id);
 }
 
 export function parameterVisitor(
@@ -48,10 +52,12 @@ export function parameterVisitor(
   if (path.node.type !== 'ClassMethod') return;
   if (path.node.key.type !== 'Identifier') return;
 
+  const statementParent = classPath.getStatementParent()!;
+
   const methodPath = path as NodePath<t.ClassMethod>;
   const params = methodPath.get('params') || [];
 
-  params.slice().forEach(function(param) {
+  params.slice().forEach(param => {
     let identifier =
       param.node.type === 'Identifier' || param.node.type === 'ObjectPattern'
         ? param.node
@@ -66,12 +72,13 @@ export function parameterVisitor(
 
     ((param.node as t.Identifier).decorators || [])
       .slice()
-      .forEach(function(decorator) {
+      .forEach(decorator => {
         if (methodPath.node.kind === 'constructor') {
           resultantDecorator = createParamDecorator(
             param.key as number,
             decorator.expression,
-            true
+            true,
+            statementParent
           );
           if (!classPath.node.decorators) {
             classPath.node.decorators = [];
@@ -81,7 +88,8 @@ export function parameterVisitor(
           resultantDecorator = createParamDecorator(
             param.key as number,
             decorator.expression,
-            false
+            false,
+            statementParent
           );
           if (!methodPath.node.decorators) {
             methodPath.node.decorators = [];

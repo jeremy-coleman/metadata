@@ -1,5 +1,6 @@
 {
   "javascript.implicitProjectConfig.checkJs": false,
   "javascript.validate.enable": false,
-  "typescript.surveys.enabled": false
+  "typescript.surveys.enabled": false,
+  "editor.formatOnSave": true
 }

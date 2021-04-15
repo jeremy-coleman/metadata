@@ -8,8 +8,9 @@ const { fixtures } = createTests({
   ],
   plugins: [
     require.resolve('../src/plugin'),
-    ['@babel/plugin-proposal-decorators', { legacy: true }],
-    ['@babel/plugin-proposal-class-properties', { loose: true }],
+    '@babel/plugin-transform-runtime',
+    ['@babel/plugin-syntax-decorators', { legacy: true }],
+    '@babel/plugin-syntax-class-properties',
   ],
 });
 
