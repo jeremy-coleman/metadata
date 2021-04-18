@@ -9,5 +9,12 @@ class MyClass {
   method(
     generic: Inter<A>,
     @Arg() generic2: InterGen<A, B>
-  ) {}
+  ): string {}
+
+  @Run
+  method2(): number {}
+
+  method3(): Promise<string> {}
+
+  method4(argument?: Promise<Generic<A>>) {}
 }

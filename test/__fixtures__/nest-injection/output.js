@@ -1,31 +1,34 @@
-import { AppService } from './app.service';
+import { DesignType as _DesignType } from "@proteriax/metadata/runtime";
+import { createType as _type } from "@proteriax/metadata/runtime";
+import { AppService } from "./app.service";
 export
 @Controller()
-@Reflect.metadata('design:type', Function)
-@Reflect.metadata('design:paramtypes', [
-  typeof AppService === 'undefined' ? Object : AppService,
+@Reflect.metadata(_DesignType.Type, Function)
+@Reflect.metadata(_DesignType.ParamType, () => [
+  _type(typeof AppService === "undefined" ? Object : AppService),
 ])
+@Reflect.metadata(_DesignType.PropertyList, ["appService", "appService2"])
+@Reflect.metadata(_DesignType.MethodList, ["getHello"])
 class AppController {
   constructor(appService) {
     this.appService = appService;
   }
 
   @Inject()
-  @Reflect.metadata(
-    'design:type',
-    typeof AppService === 'undefined' ? Object : AppService
+  @Reflect.metadata(_DesignType.Type, () =>
+    _type(typeof AppService === "undefined" ? Object : AppService)
   )
   appService;
   @Inject()
-  @Reflect.metadata(
-    'design:type',
-    typeof AppService === 'undefined' ? Object : AppService
+  @Reflect.metadata(_DesignType.Type, () =>
+    _type(typeof AppService === "undefined" ? Object : AppService)
   )
   appService2;
 
   @Get()
-  @Reflect.metadata('design:type', Function)
-  @Reflect.metadata('design:paramtypes', [])
+  @Reflect.metadata(_DesignType.Type, Function)
+  @Reflect.metadata(_DesignType.ParamType, () => [])
+  @Reflect.metadata(_DesignType.ReturnType, () => _type(String))
   getHello() {
     return this.appService.getHello();
   }

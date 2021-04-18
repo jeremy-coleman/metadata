@@ -1,73 +1,136 @@
-import { NodePath } from '@babel/traverse';
-import { types as t } from '@babel/core';
-import { serializeType } from './serializeType';
+import type { NodePath } from "@babel/traverse";
+import { types as t } from "@babel/core";
+import type { Type } from "./serializeType";
+import { SerializeType } from "./serializeType";
+import { arrowOf, id } from "../util";
+import type { TransformContext } from "../plugin";
 
-function createMetadataDesignDecorator(
-  design: 'design:type' | 'design:paramtypes' | 'design:returntype' | 'design:typeinfo',
-  typeArg: t.Expression | t.SpreadElement | t.JSXNamespacedName | t.ArgumentPlaceholder
-): t.Decorator {
-  return t.decorator(
-    t.callExpression(
-      t.memberExpression(
-        t.identifier('Reflect'),
-        t.identifier('metadata')
-      ),
-      [
-        t.stringLiteral(design),
-        typeArg
-      ]
-    )
-  )
+function assertNever(type: never) {}
+
+function getTypeAnnotation(parent: {
+  typeAnnotation: t.TypeAnnotation | t.TSTypeAnnotation | t.Noop | null;
+}): t.TSType | undefined {
+  return (
+    (parent.typeAnnotation as t.TSTypeAnnotation | null)?.typeAnnotation ??
+    undefined
+  );
 }
 
-export function metadataVisitor(
-  classPath: NodePath<t.ClassDeclaration>,
-  path: NodePath<t.ClassProperty | t.ClassMethod>
-) {
-  const field = path.node;
-  const classNode = classPath.node;
+function findTypeNode(
+  node:
+    | t.Identifier
+    | t.Pattern
+    | t.RestElement
+    | t.TSParameterProperty
+    | t.ClassProperty
+    | t.ClassPrivateProperty
+): t.TSType | undefined {
+  switch (node.type) {
+    case "Identifier":
+    case "ObjectPattern":
+    case "ArrayPattern":
+    case "AssignmentPattern":
+    case "RestElement":
+    case "ClassProperty":
+      return getTypeAnnotation(node);
+    case "ClassPrivateProperty":
+      return getTypeAnnotation(node as any);
+    case "TSParameterProperty":
+      return getTypeAnnotation(node.parameter);
+    default:
+      assertNever(node);
+  }
+}
 
-  switch (field.type) {
-    case 'ClassMethod':
-      const decorators =
-        field.kind === 'constructor' ? classNode.decorators : field.decorators;
+export class MetadataVisitor {
+  constructor(
+    private classPath: NodePath<t.ClassDeclaration>,
+    private context: TransformContext,
+    private serializer = new SerializeType({ classPath })
+  ) {}
 
-      if (!decorators || decorators.length === 0) return;
+  private fromAdvancedType(type: Type, optional?: boolean): t.CallExpression {
+    return t.callExpression(
+      this.context.$createType,
+      [
+        type.primary,
+        type.parameters &&
+          t.arrayExpression(type.parameters.map(t => this.fromAdvancedType(t))),
+        optional &&
+          t.objectExpression([
+            t.objectProperty(id("optional"), t.booleanLiteral(true)),
+          ]),
+      ].filter(Boolean)
+    );
+  }
 
-      decorators!.push(
-        createMetadataDesignDecorator(
-          'design:type',
-          t.identifier('Function')
+  private *visitClassMethod(node: t.ClassMethod) {
+    const { createMetadataDecorator: create, $keys } = this.context;
+
+    yield create($keys.Type, id("Function"));
+    yield create(
+      $keys.ParamType,
+      arrowOf(
+        t.arrayExpression(
+          node.params.map(param =>
+            this.fromAdvancedType(
+              this.serializer.serializeType(findTypeNode(param)),
+              ("optional" in param && param.optional) || false
+            )
+          )
         )
-      );
-      decorators!.push(
-        createMetadataDesignDecorator(
-          'design:paramtypes',
-          t.arrayExpression(
-            field.params.map(param => serializeType(classPath, param))
+      )
+    );
+
+    if (node.returnType) {
+      yield create(
+        $keys.ReturnType,
+        arrowOf(
+          this.fromAdvancedType(
+            this.serializer.serializeType(
+              (node.returnType as t.TSTypeAnnotation).typeAnnotation
+            )
           )
         )
       );
-      // Hint: `design:returntype` could also be implemented here, although this seems
-      // quite complicated to achieve without the TypeScript compiler.
-      // See https://github.com/microsoft/TypeScript/blob/f807b57356a8c7e476fedc11ad98c9b02a9a0e81/src/compiler/transformers/ts.ts#L1315
-      break;
+    }
+  }
 
-    case 'ClassProperty':
-      if (!field.decorators || field.decorators.length === 0) return;
+  private *visitClassProperty(field: t.ClassProperty) {
+    const { createMetadataDecorator: create, $keys } = this.context;
 
-      if (
-        !field.typeAnnotation ||
-        field.typeAnnotation.type !== 'TSTypeAnnotation'
-      )
-        return;
+    if (field.typeAnnotation?.type !== "TSTypeAnnotation") {
+      return;
+    }
 
-      field.decorators!.push(
-        createMetadataDesignDecorator(
-          'design:type',
-          serializeType(classPath, field)
+    yield create(
+      $keys.Type,
+      arrowOf(
+        this.fromAdvancedType(
+          this.serializer.serializeType(findTypeNode(field))
         )
-      );
-      break;
+      )
+    );
+  }
+
+  visit(path: NodePath<t.ClassProperty | t.ClassMethod>) {
+    const field = path.node;
+    const classNode = this.classPath.node;
+
+    switch (field.type) {
+      case "ClassMethod":
+        const decorators =
+          field.kind === "constructor"
+            ? (classNode.decorators ??= [])
+            : (field.decorators ??= []);
+
+        decorators.push(...this.visitClassMethod(field));
+        break;
+
+      case "ClassProperty":
+        field.decorators ??= [];
+        field.decorators!.push(...this.visitClassProperty(field));
+        break;
+    }
   }
 }

@@ -1,29 +1,20 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-
-    "target": "esnext",
-    "module": "commonjs",
-    "jsx": "react",
-    "strict": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-
-    "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "module": "commonjs",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "rootDir": ".",
     "skipLibCheck": true,
-
-    "outDir": "lib",
-    "rootDir": "src",
-    "baseUrl": ".",
-
-    "paths": {
-      "*": ["types/*"]
-    }
+    "sourceMap": true,
+    "strict": true,
+    "target": "esnext"
   },
-  "include": ["src/**/*", "src/**/*.json"]
+  "include": ["src/**/*", "src/**/*.json", "package.json"]
 }

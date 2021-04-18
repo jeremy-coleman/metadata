@@ -2,16 +2,16 @@
 // (C) Satyajit Sahoo. MIT License
 /* istanbul ignore file */
 /// <reference path="./shared.ts" />
-import fs from 'fs';
-import path from 'path';
-import chalk from 'chalk';
-import stripAnsi from 'strip-ansi';
-import escapeRegexp from 'escape-string-regexp';
-import ErrorStackParser from 'error-stack-parser';
-import { transformAsync } from '@babel/core';
-import { format } from 'prettier';
-import type { TransformOptions } from '@babel/core';
-import type { Options as PrettierOptions } from 'prettier';
+import fs from "fs";
+import path from "path";
+import chalk from "chalk";
+import stripAnsi from "strip-ansi";
+import escapeRegexp from "escape-string-regexp";
+import ErrorStackParser from "error-stack-parser";
+import { transformAsync } from "@babel/core";
+import { format } from "prettier";
+import type { TransformOptions } from "@babel/core";
+import type { Options as PrettierOptions } from "prettier";
 
 type TransformCallback = (
   code: string,
@@ -35,7 +35,7 @@ type FixturesOptions = {
 type TestRunnerCallback = (args: { transform: TransformCallback }) => void;
 
 const SUPPORTED_RUNNERS_TEXT =
-  'Are you using a supported test runner such as Jest (https://jestjs.io) or Mocha (https://mochajs.org)?';
+  "Are you using a supported test runner such as Jest (https://jestjs.io) or Mocha (https://mochajs.org)?";
 
 export function create({
   prettier,
@@ -45,24 +45,24 @@ export function create({
 }) {
   // Check if `describe` and `it` globals are available and throw if not
   // This avoids confusion with unsupported test runners and incorrect usage
-  if (!('describe' in global && 'it' in global)) {
+  if (!("describe" in global && "it" in global)) {
     throw new Error(
-      `Couldn't find ${chalk.blue('describe')} and ${chalk.blue(
-        'it'
+      `Couldn't find ${chalk.blue("describe")} and ${chalk.blue(
+        "it"
       )} in the global scope. ${SUPPORTED_RUNNERS_TEXT}\n`
     );
   }
 
   const transform = async (code: string, options?: TransformOptions) => {
     const res = await transformAsync(code, {
-      caller: { name: 'babel-test' },
+      caller: { name: "babel-test" },
       babelrc: false,
       configFile: false,
       ...config,
       ...options,
     });
     return {
-      code: format(res.code!, { ...prettier, parser: 'babel-ts' }).trim(),
+      code: format(res.code!, { ...prettier, parser: "babel-ts" }).trim(),
     };
   };
 
@@ -73,12 +73,12 @@ export function create({
   ) => () => {
     if (options) {
       const hooks = [
-        'before',
-        'after',
-        'beforeEach',
-        'afterEach',
-        'beforeAll',
-        'afterAll',
+        "before",
+        "after",
+        "beforeEach",
+        "afterEach",
+        "beforeAll",
+        "afterAll",
       ];
 
       for (const hook of hooks) {
@@ -100,32 +100,32 @@ export function create({
       .filter(f => fs.lstatSync(path.join(directory, f)).isDirectory())
       .forEach(f => {
         // Respect skip. and only. prefixes in folder names
-        const t = f.startsWith('skip.')
+        const t = f.startsWith("skip.")
           ? it.skip
-          : f.startsWith('only.')
+          : f.startsWith("only.")
           ? it.only
           : it;
 
-        t(f.replace(/^(skip|only)\./, '').replace(/(-|_)/g, ' '), () => {
-          const filename = path.join(path.join(directory, f), 'code.js');
-          const content = fs.readFileSync(filename, 'utf8');
+        t(f.replace(/^(skip|only)\./, "").replace(/(-|_)/g, " "), () => {
+          const filename = path.join(path.join(directory, f), "code.js");
+          const content = fs.readFileSync(filename, "utf8");
 
           return Promise.resolve(callback(content, { filename })).then(
             output => {
               try {
-                if ('expect' in global) {
+                if ("expect" in global) {
                   // Use `expect` for assertions if available, for example when using Jest
                   const expected = expect(output.content);
 
-                  if (typeof expected.toMatchFile === 'function') {
+                  if (typeof expected.toMatchFile === "function") {
                     expected.toMatchFile(output.filename);
                   } else {
-                    expected.toBe(fs.readFileSync(output.filename, 'utf8'));
+                    expected.toBe(fs.readFileSync(output.filename, "utf8"));
                   }
                 } else {
                   // If `expect` is not available, use `assert`, for example when using Mocha
-                  const assert = require('assert');
-                  const actual = fs.readFileSync(output.filename, 'utf8');
+                  const assert = require("assert");
+                  const actual = fs.readFileSync(output.filename, "utf8");
 
                   assert.strictEqual(
                     actual,
@@ -152,7 +152,7 @@ export function create({
     const stack = ErrorStackParser.parse(e)
       .filter(s => s.fileName !== __filename)
       .map(s => s.source)
-      .join('\n');
+      .join("\n");
 
     class TestError extends Error {
       constructor(message: string) {
@@ -161,8 +161,8 @@ export function create({
       }
     }
 
-    const output = path.join(path.dirname(filename), 'output.js');
-    const error = path.join(path.dirname(filename), 'error.js');
+    const output = path.join(path.dirname(filename), "output.js");
+    const error = path.join(path.dirname(filename), "error.js");
 
     if (fs.existsSync(output) && fs.existsSync(error)) {
       // The test should either pass, or throw
@@ -193,7 +193,7 @@ export function create({
       }
       return {
         filename: output,
-        content: code_2 + '\n',
+        content: code_2 + "\n",
         stack,
       };
     } catch (e) {
@@ -215,9 +215,9 @@ export function create({
         // This makes sure that the stacktraces are same across machines
         content:
           stripAnsi(e.stack).replace(
-            new RegExp(escapeRegexp(process.cwd()), 'g'),
-            '<cwd>'
-          ) + '\n',
+            new RegExp(escapeRegexp(process.cwd()), "g"),
+            "<cwd>"
+          ) + "\n",
         stack,
       };
     }

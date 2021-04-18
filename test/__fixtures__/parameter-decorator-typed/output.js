@@ -1,20 +1,33 @@
+import { DesignType as _DesignType } from "@proteriax/metadata/runtime";
+import { createType as _type } from "@proteriax/metadata/runtime";
+
+@Reflect.metadata(_DesignType.PropertyList, [])
+@Reflect.metadata(_DesignType.MethodList, [])
 class Injected {}
 
 @_dec
-@Reflect.metadata('design:type', Function)
-@Reflect.metadata('design:paramtypes', [
-  typeof Injected === 'undefined' ? Object : Injected,
+@Reflect.metadata(_DesignType.Type, Function)
+@Reflect.metadata(_DesignType.ParamType, () => [
+  _type(typeof Injected === "undefined" ? Object : Injected),
 ])
+@Reflect.metadata(_DesignType.PropertyList, [])
+@Reflect.metadata(_DesignType.MethodList, [])
 class MyClass {
   constructor(parameter) {}
 }
 
 @_dec2
 @_dec3
-@Reflect.metadata('design:type', Function)
-@Reflect.metadata('design:paramtypes', [
-  typeof Injected === 'undefined' ? Object : Injected,
-  typeof Injected === 'undefined' ? Object : Injected,
+@Reflect.metadata(_DesignType.Type, Function)
+@Reflect.metadata(_DesignType.ParamType, () => [
+  _type(typeof Injected === "undefined" ? Object : Injected),
+  _type(typeof Injected === "undefined" ? Object : Injected),
+])
+@Reflect.metadata(_DesignType.PropertyList, ["parameter"])
+@Reflect.metadata(_DesignType.MethodList, [
+  "methodUndecorated",
+  "method",
+  "methodWithObjectSpread",
 ])
 class MyOtherClass {
   constructor(parameter, otherParam) {
@@ -22,24 +35,26 @@ class MyOtherClass {
   }
 
   @_dec4
-  @Reflect.metadata('design:type', Function)
-  @Reflect.metadata('design:paramtypes', [String, void 0])
+  @Reflect.metadata(_DesignType.Type, Function)
+  @Reflect.metadata(_DesignType.ParamType, () => [_type(String), _type(Object)])
   methodUndecorated(param, otherParam) {}
 
-  @decorate('named')
+  @decorate("named")
   @_dec5
   @_dec6
-  @Reflect.metadata('design:type', Function)
-  @Reflect.metadata('design:paramtypes', [
-    typeof Injected === 'undefined' ? Object : Injected,
-    typeof Schema === 'undefined' ? Object : Schema,
+  @Reflect.metadata(_DesignType.Type, Function)
+  @Reflect.metadata(_DesignType.ParamType, () => [
+    _type(typeof Injected === "undefined" ? Object : Injected),
+    _type(typeof Schema === "undefined" ? Object : Schema),
   ])
   method(param, schema) {}
 
   @_dec7
-  @Reflect.metadata('design:type', Function)
-  @Reflect.metadata('design:paramtypes', [
-    typeof SchemaObjectSpread === 'undefined' ? Object : SchemaObjectSpread,
+  @Reflect.metadata(_DesignType.Type, Function)
+  @Reflect.metadata(_DesignType.ParamType, () => [
+    _type(
+      typeof SchemaObjectSpread === "undefined" ? Object : SchemaObjectSpread
+    ),
   ])
   methodWithObjectSpread({ name }) {}
 }
@@ -47,20 +62,22 @@ class MyOtherClass {
 @Decorate
 @_dec8
 @_dec9
-@Reflect.metadata('design:type', Function)
-@Reflect.metadata('design:paramtypes', [
-  typeof Injected === 'undefined' ? Object : Injected,
-  typeof Injected === 'undefined' ? Object : Injected,
+@Reflect.metadata(_DesignType.Type, Function)
+@Reflect.metadata(_DesignType.ParamType, () => [
+  _type(typeof Injected === "undefined" ? Object : Injected),
+  _type(typeof Injected === "undefined" ? Object : Injected),
 ])
+@Reflect.metadata(_DesignType.PropertyList, ["module"])
+@Reflect.metadata(_DesignType.MethodList, ["method"])
 class DecoratedClass {
   constructor(module, otherModule) {
     this.module = module;
   }
 
-  @decorate('example')
+  @decorate("example")
   @_dec10
-  @Reflect.metadata('design:type', Function)
-  @Reflect.metadata('design:paramtypes', [String])
+  @Reflect.metadata(_DesignType.Type, Function)
+  @Reflect.metadata(_DesignType.ParamType, () => [_type(String)])
   method(param) {}
 }
 
@@ -73,7 +90,7 @@ function _dec2(target, key) {
 }
 
 function _dec3(target, key) {
-  return inject('KIND')(target, undefined, 1);
+  return inject("KIND")(target, undefined, 1);
 }
 
 function _dec4(target, key) {

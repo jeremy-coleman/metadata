@@ -1,25 +1,29 @@
-'use strict';
+"use strict";
 
-var _interopRequireDefault = require('@babel/runtime/helpers/interopRequireDefault');
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-var _based = _interopRequireDefault(require('based'));
+var _runtime = require("@proteriax/metadata/runtime");
 
-var _decorator = _interopRequireDefault(require('decorator'));
+var _based = _interopRequireDefault(require("based"));
 
-var _some = require('some');
+var _decorator = _interopRequireDefault(require("decorator"));
 
-var _graphql = require('@nestjs/graphql');
+var _some = require("some");
 
-var _xyz = require('xyz');
+var _graphql = require("@nestjs/graphql");
+
+var _xyz = require("xyz");
 
 @_based.default
 @_dec
 @_dec2
-@Reflect.metadata('design:type', Function)
-@Reflect.metadata('design:paramtypes', [
-  typeof _some.Some === 'undefined' ? Object : _some.Some,
-  typeof _some.Some === 'undefined' ? Object : _some.Some,
+@Reflect.metadata(_runtime.DesignType.Type, Function)
+@Reflect.metadata(_DesignType.ParamType, () => [
+  _type(typeof _some.Some === "undefined" ? Object : _some.Some),
+  _type(typeof _some.Some === "undefined" ? Object : _some.Some),
 ])
+@Reflect.metadata(_DesignType.PropertyList, ["param", "param2"])
+@Reflect.metadata(_DesignType.MethodList, ["methodName"])
 class Named {
   constructor(param, param2) {
     this.param = param;
@@ -30,11 +34,13 @@ class Named {
   @_dec3
   @_dec4
   @_dec5
-  @Reflect.metadata('design:type', Function)
-  @Reflect.metadata('design:paramtypes', [
-    typeof _graphql.Args === 'undefined' ? Object : _graphql.Args,
-    typeof _graphql.Context === 'undefined' ? Object : _graphql.Context,
-    Object,
+  @Reflect.metadata(_runtime.DesignType.Type, Function)
+  @Reflect.metadata(_DesignType.ParamType, () => [
+    (0, _runtime.createType)(
+      typeof _graphql.Args === "undefined" ? Object : _graphql.Args
+    ),
+    _type(typeof _graphql.Context === "undefined" ? Object : _graphql.Context),
+    _type(Object),
   ])
   methodName(args, context, xyz) {}
 }

@@ -1,8 +1,8 @@
-import { create } from './babel-test';
-import type { TransformOptions } from '@babel/core';
-import { prettier } from '../package.json';
+import type { TransformOptions } from "@babel/core";
+import { toMatchFile } from "jest-file-snapshot";
+import { create } from "./babel-test";
+import { prettier } from "../package.json";
 
-import { toMatchFile } from 'jest-file-snapshot';
 expect.extend({ toMatchFile });
 
 export const createTests = (options: TransformOptions) =>
