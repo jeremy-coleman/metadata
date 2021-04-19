@@ -1,5 +1,6 @@
 import { types as t } from "@babel/core";
 import type { NodePath } from "@babel/traverse";
+import { addDecorator, id } from "../util";
 import type { TransformContext } from "../plugin";
 
 /**
@@ -25,16 +26,16 @@ function createParamDecorator(
   isConstructor = false,
   statementParent: NodePath<t.Statement>
 ) {
-  const id = statementParent.scope.generateUidIdentifier("dec");
+  const dec = statementParent.scope.generateUidIdentifier("decorateArgument");
   (statementParent.container as any[]).push(
     t.functionDeclaration(
-      id,
-      [t.identifier("target"), t.identifier("key")],
-      t.blockStatement([
+      /* id     */ dec,
+      /* params */ [id("target"), id("key")],
+      /* body   */ t.blockStatement([
         t.returnStatement(
           t.callExpression(decoratorExpression, [
-            t.identifier("target"),
-            t.identifier(isConstructor ? "undefined" : "key"),
+            id("target"),
+            id(isConstructor ? "undefined" : "key"),
             t.numericLiteral(paramIndex),
           ])
         ),
@@ -42,7 +43,7 @@ function createParamDecorator(
     )
   );
 
-  return t.decorator(id);
+  return t.decorator(dec);
 }
 
 export function parameterVisitor(
@@ -51,15 +52,13 @@ export function parameterVisitor(
   context: TransformContext
 ) {
   if (path.type !== "ClassMethod") return;
-  if (path.node.type !== "ClassMethod") return;
   if (path.node.key.type !== "Identifier") return;
 
   const statementParent = classPath.getStatementParent()!;
 
-  const methodPath = path as NodePath<t.ClassMethod>;
-  const params = methodPath.get("params") || [];
+  const params = path.get("params") || [];
 
-  params.slice().forEach(param => {
+  for (const param of params) {
     const identifier =
       param.node.type === "Identifier" || param.node.type === "ObjectPattern"
         ? param.node
@@ -68,36 +67,27 @@ export function parameterVisitor(
         ? param.node.parameter
         : null;
 
-    if (identifier == null) return;
+    if (identifier == null) continue;
 
-    let resultantDecorator: t.Decorator | undefined;
+    const decorators =
+      ("decorators" in param.node && param.node.decorators) || [];
+    if (!decorators.length) continue;
 
-    ((param.node as t.Identifier).decorators || [])
-      .slice()
-      .forEach(decorator => {
-        if (methodPath.node.kind === "constructor") {
-          resultantDecorator = createParamDecorator(
-            param.key as number,
-            decorator.expression,
-            true,
-            statementParent
-          );
-          classPath.node.decorators ??= [];
-          classPath.node.decorators.push(resultantDecorator);
-        } else {
-          resultantDecorator = createParamDecorator(
-            param.key as number,
-            decorator.expression,
-            false,
-            statementParent
-          );
-          methodPath.node.decorators ??= [];
-          methodPath.node.decorators.push(resultantDecorator);
-        }
-      });
+    const isConstructor = path.node.kind === "constructor";
+    const target = isConstructor ? classPath.node : path.node;
 
-    if (resultantDecorator) {
-      (param.node as t.Identifier).decorators = null;
+    for (const decorator of decorators) {
+      addDecorator(
+        target,
+        createParamDecorator(
+          param.key as number,
+          decorator.expression,
+          isConstructor,
+          statementParent
+        )
+      );
     }
-  });
+
+    (param.node as t.Identifier).decorators = null;
+  }
 }

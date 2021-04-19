@@ -1,7 +1,7 @@
 import path from "path";
 import { createTests } from "./shared";
 
-const { fixtures } = createTests({
+const { createRunner } = createTests({
   presets: [
     ["@babel/preset-env", { useBuiltIns: false, targets: { node: true } }],
     ["@babel/preset-typescript", { allExtensions: true }],
@@ -14,4 +14,7 @@ const { fixtures } = createTests({
   ],
 });
 
-fixtures("emit metadata with node env", path.join(__dirname, "__node__"));
+describe(
+  "emit metadata with node env",
+  createRunner(path.join(__dirname, "__node__"))
+);

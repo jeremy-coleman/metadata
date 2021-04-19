@@ -3,7 +3,7 @@ import type { NodePath, types as t } from "@babel/core";
 import { addNamed } from "@babel/helper-module-imports";
 import { parameterVisitor } from "./parameter/parameterVisitor";
 import { MetadataVisitor } from "./metadata/metadataVisitor";
-import { id } from "./util";
+import { addDecorator, id } from "./util";
 import type { DesignType } from "./runtime";
 import { name } from "../package.json";
 
@@ -92,16 +92,14 @@ export default ({ types: t }: BabelAPI): babel.PluginObj => ({
 
             if (node.type === "ClassMethod" && node.kind === "constructor") {
               node.params
-                .filter((x): x is t.TSParameterProperty =>
-                  t.isTSParameterProperty(x)
+                .filter((_): _ is t.TSParameterProperty =>
+                  t.isTSParameterProperty(_)
                 )
-                .map(x => x.parameter)
-                .map(x =>
-                  t.isAssignmentPattern(x)
-                    ? (x.left as t.Identifier)
-                    : (x as t.Identifier)
+                .map(_ => _.parameter)
+                .map(_ =>
+                  t.isAssignmentPattern(_) ? (_.left as t.Identifier) : _
                 )
-                .map(x => x.name)
+                .map(_ => _.name)
                 .forEach(name => {
                   fields.ClassProperty.add(name);
                 });
@@ -111,8 +109,7 @@ export default ({ types: t }: BabelAPI): babel.PluginObj => ({
             fields[field.type].add(node.key.name);
           }
 
-          path.node.decorators ??= [];
-          path.node.decorators.push(
+          addDecorator(path.node, [
             createMetadataDecorator(
               $keys.PropertyList,
               t.arrayExpression(
@@ -124,8 +121,8 @@ export default ({ types: t }: BabelAPI): babel.PluginObj => ({
               t.arrayExpression(
                 Array.from(fields.ClassMethod, _ => t.stringLiteral(_))
               )
-            )
-          );
+            ),
+          ]);
 
           /**
            * We need to keep binding in order to let babel know where imports

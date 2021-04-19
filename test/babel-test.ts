@@ -2,21 +2,23 @@
 // (C) Satyajit Sahoo. MIT License
 /* istanbul ignore file */
 /// <reference path="./shared.ts" />
+import "regexp.escape/shim";
 import fs from "fs";
-import path from "path";
+import { join, basename, dirname } from "path";
+import dedent from "dedent";
 import chalk from "chalk";
 import stripAnsi from "strip-ansi";
-import escapeRegexp from "escape-string-regexp";
 import ErrorStackParser from "error-stack-parser";
 import { transformAsync } from "@babel/core";
 import { format } from "prettier";
 import type { TransformOptions } from "@babel/core";
 import type { Options as PrettierOptions } from "prettier";
 
-type TransformCallback = (
-  code: string,
-  options?: TransformOptions
-) => Promise<{ code: string }>;
+declare global {
+  interface RegExpConstructor {
+    escape(source: string): string;
+  }
+}
 
 type DoneCallback = {
   (...args: any[]): any;
@@ -32,27 +34,12 @@ type FixturesOptions = {
   afterAll?: LifecycleCallback;
 };
 
-type TestRunnerCallback = (args: { transform: TransformCallback }) => void;
-
-const SUPPORTED_RUNNERS_TEXT =
-  "Are you using a supported test runner such as Jest (https://jestjs.io) or Mocha (https://mochajs.org)?";
-
 export function create({
   prettier,
   ...config
 }: TransformOptions & {
   prettier: PrettierOptions;
 }) {
-  // Check if `describe` and `it` globals are available and throw if not
-  // This avoids confusion with unsupported test runners and incorrect usage
-  if (!("describe" in global && "it" in global)) {
-    throw new Error(
-      `Couldn't find ${chalk.blue("describe")} and ${chalk.blue(
-        "it"
-      )} in the global scope. ${SUPPORTED_RUNNERS_TEXT}\n`
-    );
-  }
-
   const transform = async (code: string, options?: TransformOptions) => {
     const res = await transformAsync(code, {
       caller: { name: "babel-test" },
@@ -66,11 +53,7 @@ export function create({
     };
   };
 
-  const runner = (
-    directory: string,
-    options?: FixturesOptions,
-    callback?: FixturesCallback
-  ) => () => {
+  const runner = (directory: string, options?: FixturesOptions) => () => {
     if (options) {
       const hooks = [
         "before",
@@ -83,21 +66,13 @@ export function create({
 
       for (const hook of hooks) {
         if (options[hook] !== undefined) {
-          if (global[hook] !== undefined) {
-            global[hook](options[hook]);
-          } else {
-            throw Error(
-              `Couldn't find ${chalk.blue(
-                hook
-              )} in the global scope. ${SUPPORTED_RUNNERS_TEXT}\n`
-            );
-          }
+          global[hook](options[hook]);
         }
       }
     }
 
     fs.readdirSync(directory)
-      .filter(f => fs.lstatSync(path.join(directory, f)).isDirectory())
+      .filter(f => fs.lstatSync(join(directory, f)).isDirectory())
       .forEach(f => {
         // Respect skip. and only. prefixes in folder names
         const t = f.startsWith("skip.")
@@ -106,50 +81,43 @@ export function create({
           ? it.only
           : it;
 
-        t(f.replace(/^(skip|only)\./, "").replace(/(-|_)/g, " "), () => {
-          const filename = path.join(path.join(directory, f), "code.js");
+        t(f.replace(/^(skip|only)\./, "").replace(/(-|_)/g, " "), async () => {
+          const filename = join(join(directory, f), "code.js");
           const content = fs.readFileSync(filename, "utf8");
 
-          return Promise.resolve(callback(content, { filename })).then(
-            output => {
-              try {
-                if ("expect" in global) {
-                  // Use `expect` for assertions if available, for example when using Jest
-                  const expected = expect(output.content);
+          const output = await callback(content, { filename });
+          try {
+            if ("expect" in global) {
+              // Use `expect` for assertions if available, for example when using Jest
+              const expected = expect(output.content);
 
-                  if (typeof expected.toMatchFile === "function") {
-                    expected.toMatchFile(output.filename);
-                  } else {
-                    expected.toBe(fs.readFileSync(output.filename, "utf8"));
-                  }
-                } else {
-                  // If `expect` is not available, use `assert`, for example when using Mocha
-                  const assert = require("assert");
-                  const actual = fs.readFileSync(output.filename, "utf8");
-
-                  assert.strictEqual(
-                    actual,
-                    output.content,
-                    `Expected output doesn't match ${path.basename(
-                      output.filename
-                    )}`
-                  );
-                }
-              } catch (e) {
-                e.stack = `${e.message}\n${output.stack}`;
-                throw e;
+              if (typeof expected.toMatchFile === "function") {
+                expected.toMatchFile(output.filename);
+              } else {
+                expected.toBe(fs.readFileSync(output.filename, "utf8"));
               }
+            } else {
+              // If `expect` is not available, use `assert`, for example when using Mocha
+              const assert = require("assert");
+              const actual = fs.readFileSync(output.filename, "utf8");
+
+              assert.strictEqual(
+                actual,
+                output.content,
+                `Expected output doesn't match ${basename(output.filename)}`
+              );
             }
-          );
+          } catch (e) {
+            e.stack = `${e.message}\n${output.stack}`;
+            throw e;
+          }
         });
       });
   };
 
-  type FixturesCallback = ReturnType<typeof helper>;
-
-  const helper = (e: Error) => async (code: string, { filename }) => {
+  const callback = async (code: string, { filename }) => {
     // We should filter out stack traces from the library
-    const stack = ErrorStackParser.parse(e)
+    const stack = ErrorStackParser.parse(new Error())
       .filter(s => s.fileName !== __filename)
       .map(s => s.source)
       .join("\n");
@@ -159,63 +127,62 @@ export function create({
         super(message);
         this.stack = `\n${stack}`;
       }
+
+      static throw(list: TemplateStringsArray, ...inters: any[]): never {
+        throw new TestError(chalk.white(dedent(chalk(list, ...inters))));
+      }
     }
 
-    const output = path.join(path.dirname(filename), "output.js");
-    const error = path.join(path.dirname(filename), "error.js");
+    const output = join(dirname(filename), "output.js");
+    const error = join(dirname(filename), "error.js");
 
     if (fs.existsSync(output) && fs.existsSync(error)) {
       // The test should either pass, or throw
       // If the fixture has files for output and error, one needs to be removed
-      throw new TestError(
-        // By default, Jest will grey out the text and highlight the stack trace
-        // We force it to be white for more emphasis on the message
-        chalk.white(
-          `Both ${chalk.blue(path.basename(output))} and ${chalk.blue(
-            path.basename(error)
-          )} exist for ${chalk.blue(
-            path.basename(path.dirname(filename))
-          )}.\n\nRemove one of them to continue.`
-        )
-      );
+
+      // By default, Jest will grey out the text and highlight the stack trace
+      // We force it to be white for more emphasis on the message
+      TestError.throw`
+        Both {blue output.js} and {blue error.js} exist for {blue ${basename(
+          dirname(filename)
+        )}}.
+        
+        Remove one of them to continue.
+      `;
     }
 
     try {
-      const { code: code_2 } = await transform(code, { filename });
+      const { code: result } = await transform(code, { filename });
       if (fs.existsSync(error)) {
-        throw new TestError(
-          chalk.white(
-            `The test previously failed with an error, but passed for this run.\n\nIf this is expected, remove the file ${chalk.blue(
-              path.basename(error)
-            )} to continue.`
-          )
-        );
+        TestError.throw`
+          The test previously failed with an error, but passed for this run.
+          
+          If this is expected, remove the file {blue error.js} to continue.
+        `;
       }
       return {
         filename: output,
-        content: code_2 + "\n",
+        content: result + "\n",
         stack,
       };
     } catch (e) {
       if (fs.existsSync(output)) {
         console.error(e);
-        throw new TestError(
-          chalk.white(
-            `The test previously passed, but failed with an error for this run.\n\nIf this is expected, remove the file ${chalk.blue(
-              path.basename(output)
-            )} to continue.`
-          )
-        );
+        TestError.throw`
+          The test previously passed, but failed with an error for this run.
+          
+          If this is expected, remove the file {blue output.js} to continue.
+        `;
       }
       return {
         filename: error,
-        // Errors might have ansi colors, for example babel codeframe error
+        // Errors might have ansi colors, for example babel code frame error
         // Strip them so the error is more readable
         // Also replace the current working directory with a placeholder
-        // This makes sure that the stacktraces are same across machines
+        // This makes sure that the StackTraces are same across machines
         content:
           stripAnsi(e.stack).replace(
-            new RegExp(escapeRegexp(process.cwd()), "g"),
+            new RegExp(RegExp.escape(process.cwd()), "g"),
             "<cwd>"
           ) + "\n",
         stack,
@@ -223,30 +190,5 @@ export function create({
     }
   };
 
-  // We create a new error here so we can point to user's file in stack trace
-  // Otherwise stack traces will point to the library code
-  function fixtures(
-    title: string,
-    directory: string,
-    options?: FixturesOptions,
-    callback: FixturesCallback = helper(new Error())
-  ) {
-    describe(title, runner(directory, options, callback));
-  }
-
-  fixtures.skip = (
-    title: string,
-    directory: string,
-    options?: FixturesOptions,
-    callback: FixturesCallback = helper(new Error())
-  ) => describe.skip(title, runner(directory, options, callback));
-
-  fixtures.only = (
-    title: string,
-    directory: string,
-    options?: FixturesOptions,
-    callback: FixturesCallback = helper(new Error())
-  ) => describe.only(title, runner(directory, options, callback));
-
-  return { transform, fixtures };
+  return { createRunner: runner };
 }

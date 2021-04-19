@@ -1,5 +1,4 @@
 import { types as t } from "@babel/core";
-import type { NodePath } from "@babel/traverse";
 import { id } from "../util";
 
 type InferArray<T> = T extends Array<infer A> ? A : never;
@@ -23,7 +22,7 @@ function Type(primary: SerializedType, parameters?: Type[]): Type {
 }
 
 interface SerializationContext {
-  classPath: NodePath<t.ClassDeclaration>;
+  isSafeReference(reference: t.Identifier | t.MemberExpression): boolean;
 }
 
 const $undefined = t.identifier("undefined");
@@ -46,11 +45,7 @@ function isSafeReference(reference: t.Identifier | t.MemberExpression) {
 }
 
 export class SerializeType {
-  private className!: string;
-
-  constructor(private readonly context: SerializationContext) {
-    this.className = this.context.classPath.node.id?.name ?? "";
-  }
+  constructor(private readonly context: SerializationContext) {}
 
   private serializeTypeReferenceNode(node: t.TSTypeReference): Type {
     /**
@@ -60,21 +55,13 @@ export class SerializeType {
      * This is resolved in main plugin method, calling
      * `path.scope.crawl()` which updates the bindings.
      */
-    const reference = this.serializeReference(node.typeName);
+    const reference = serializeReference(node.typeName);
 
     const typeParams = node.typeParameters?.params.map(param =>
       this.serializeType(param)
     );
 
-    /**
-     * We should omit references to self (class) since it will throw a
-     * ReferenceError at runtime due to babel transpile output.
-     */
-    if (this.isClassType(reference)) {
-      return Type(reference as t.Identifier, typeParams);
-    }
-
-    if (isSafeReference(reference)) {
+    if (this.context.isSafeReference(reference) || isSafeReference(reference)) {
       return Type(reference as t.Identifier, typeParams);
     }
 
@@ -95,36 +82,6 @@ export class SerializeType {
         t.cloneDeep(reference)
       ),
       typeParams
-    );
-  }
-
-  /**
-   * Checks if node (this should be the result of `serializeReference`) member
-   * expression or identifier is a reference to self (class name).
-   * In this case, we just emit `Object` in order to avoid ReferenceError.
-   */
-  private isClassType(node: t.Expression): boolean {
-    switch (node.type) {
-      case "Identifier":
-        return node.name === this.className;
-      case "MemberExpression":
-        return this.isClassType(node.object);
-      default:
-        throw new Error(
-          `The property expression at ${node.start} is not valid as a Type to be used in Reflect.metadata`
-        );
-    }
-  }
-
-  private serializeReference(
-    typeName: t.Identifier | t.TSQualifiedName
-  ): t.Identifier | t.MemberExpression {
-    if (typeName.type === "Identifier") {
-      return id(typeName.name);
-    }
-    return t.memberExpression(
-      this.serializeReference(typeName.left),
-      typeName.right
     );
   }
 
@@ -184,7 +141,7 @@ export class SerializeType {
             /**
              * @todo Use `path` error building method.
              */
-            throw new Error("Bad type for decorator" + node.literal);
+            throw new Error("Bad type for decorator " + node.literal);
         }
 
       case "TSNumberKeyword":
@@ -228,7 +185,7 @@ export class SerializeType {
    *
    *  https://github.com/Microsoft/TypeScript/blob/2932421370df720f0ccfea63aaf628e32e881429/src/compiler/transformers/ts.ts
    */
-  private serializeTypeList(types: ReadonlyArray<t.TSType>): SerializedType {
+  private serializeTypeList(types: readonly t.TSType[]): SerializedType {
     let serializedUnion: SerializedType | undefined;
 
     for (let typeNode of types) {
@@ -253,6 +210,7 @@ export class SerializeType {
         // One of the individual is global object, return immediately
         return serializedIndividual;
       }
+
       // If there exists union that is not void 0 expression, check if the the common type is identifier.
       // anything more complex and we will just default to Object
       else if (serializedUnion) {
@@ -271,6 +229,15 @@ export class SerializeType {
     }
 
     // If we were able to find common type, use it
-    return serializedUnion || $undefined; // Fallback is only hit if all union constituients are null/undefined/never
+    return serializedUnion || $undefined; // Fallback is only hit if all union constituents are null/undefined/never
   }
+}
+
+function serializeReference(
+  typeName: t.Identifier | t.TSQualifiedName
+): t.Identifier | t.MemberExpression {
+  if (typeName.type === "Identifier") {
+    return id(typeName.name);
+  }
+  return t.memberExpression(serializeReference(typeName.left), typeName.right);
 }

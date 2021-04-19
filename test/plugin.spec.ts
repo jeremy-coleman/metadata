@@ -1,7 +1,7 @@
 import path from "path";
 import { createTests } from "./shared";
 
-const { fixtures } = createTests({
+const { createRunner } = createTests({
   presets: [["@babel/preset-typescript", { allExtensions: true }]],
   plugins: [
     require.resolve("../src/plugin"),
@@ -12,4 +12,4 @@ const { fixtures } = createTests({
   ],
 });
 
-fixtures("emit metadata", path.join(__dirname, "__fixtures__"));
+describe("emit metadata", createRunner(path.join(__dirname, "__fixtures__")));

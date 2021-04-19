@@ -42,11 +42,37 @@ function findTypeNode(
   }
 }
 
+function createIsSafeReference(classPath: NodePath<t.ClassDeclaration>) {
+  const className = classPath.node.id?.name ?? "";
+
+  /**
+   * Checks if node (this should be the result of `serializeReference`) member
+   * expression or identifier is a reference to self (class name).
+   * In this case, we just emit `Object` in order to avoid ReferenceError.
+   */
+  return function isClassType(
+    node: t.Expression | t.MemberExpression
+  ): boolean {
+    switch (node.type) {
+      case "Identifier":
+        return node.name === className;
+      case "MemberExpression":
+        return isClassType(node.object);
+      default:
+        throw new Error(
+          `The property expression at ${node.start} is not valid as a Type to be used in Reflect.metadata`
+        );
+    }
+  };
+}
+
 export class MetadataVisitor {
   constructor(
     private classPath: NodePath<t.ClassDeclaration>,
     private context: TransformContext,
-    private serializer = new SerializeType({ classPath })
+    private serializer = new SerializeType({
+      isSafeReference: createIsSafeReference(classPath),
+    })
   ) {}
 
   private fromAdvancedType(type: Type, optional?: boolean): t.CallExpression {
