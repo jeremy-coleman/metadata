@@ -39,6 +39,8 @@ describe("emitDecoratorMetadata layer", () => {
       @dec
       indecipherable!: { a: string }
       @dec
+      nullable?: string;
+      @dec
       method(param1: string, param2: number): string {
         return ""
       }
@@ -54,6 +56,7 @@ describe("emitDecoratorMetadata layer", () => {
     expect(getMetadata("design:type", "number")).toBe(Number);
     expect(getMetadata("design:type", "array")).toBe(Array);
     expect(getMetadata("design:type", "indecipherable")).toBe(Object);
+    expect(getMetadata("design:type", "nullable")).toBe(Object);
     expect(getMetadata("design:type", "method")).toBe(Function);
     expect(getMetadata("design:paramtypes", "method")).toEqual([
       String,

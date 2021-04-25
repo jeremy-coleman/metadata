@@ -16,6 +16,11 @@ export function createType(
   params?: any[],
   options?: Record<string, any>
 ) {
+  if (!Array.isArray(params)) {
+    options = params;
+    params = [];
+  }
+
   return {
     get type() {
       return typeFactory();
@@ -114,6 +119,9 @@ export function getClassPropertyType<T = any>(
   );
 }
 
+const toTSType = (type: TypeInformation) =>
+  type.nullable ? Object : type.type;
+
 /**
  * Compatibility layer with `emitDecoratorMetadata`. Class decorated with
  * `toReflectMetadata` will have the same metadata as if compiled by TypeScript
@@ -122,10 +130,8 @@ export function getClassPropertyType<T = any>(
 export const toReflectMetadata: ClassDecorator = (Class: any) => {
   for (const method of getClassMethods(Class)) {
     try {
-      const type = getClassMethodArguments(Class, method).map(
-        info => info.type
-      );
-      const { type: returnType } = getClassMethodReturnType(Class, method);
+      const type = getClassMethodArguments(Class, method).map(toTSType);
+      const returnType = toTSType(getClassMethodReturnType(Class, method));
       __decorate(
         [
           __metadata("design:type", Function),
@@ -140,7 +146,7 @@ export const toReflectMetadata: ClassDecorator = (Class: any) => {
   }
 
   for (const property of getClassProperties(Class)) {
-    const { type } = getClassPropertyType(Class, property);
+    const type = toTSType(getClassPropertyType(Class, property));
     __decorate(
       [__metadata("design:type", type)],
       Class.prototype,

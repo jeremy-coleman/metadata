@@ -64,7 +64,7 @@ class MyClass {
         ]),
       ],
       {
-        optional: true,
+        nullable: true,
       }
     ),
   ])
@@ -73,7 +73,7 @@ class MyClass {
   @Reflect.metadata(
     _DesignType.Type,
     _type(() => Number, {
-      optional: true,
+      nullable: true,
     })
   )
   optional;

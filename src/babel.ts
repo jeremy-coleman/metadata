@@ -61,7 +61,7 @@ const sharedIds = (t: types) => ({
 
   key: t.identifier("key"),
   target: t.identifier("target"),
-  optional: t.identifier("optional"),
+  nullable: t.identifier("nullable"),
 });
 
 export default (

@@ -84,7 +84,7 @@ export class MetadataVisitor {
         parameters && t.arrayExpression(parameters.map(t => this.fromType(t))),
         optional &&
           t.objectExpression([
-            t.objectProperty(ids.optional, t.booleanLiteral(true)),
+            t.objectProperty(ids.nullable, t.booleanLiteral(true)),
           ]),
       ].filter(Boolean)
     );
