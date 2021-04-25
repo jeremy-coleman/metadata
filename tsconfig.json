@@ -11,10 +11,11 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "rootDir": ".",
+    "stripInternal": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "esnext"
+    "target": "es2019"
   },
   "include": ["src/**/*", "src/**/*.json", "package.json"]
 }

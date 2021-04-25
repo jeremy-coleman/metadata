@@ -1,4 +1,4 @@
-# babel-more-metadata
+# babel-annotate
 
 Babel plugin to emit decorator extensive metadata information like TypeScript
 compiler, but works with lazy initialization, circular dependencies, generics
@@ -25,15 +25,16 @@ import { __decorate } from "tslib";
 import { Column } from "typeorm";
 import { getClassProperties, getClassPropertyType } from "PENDING_PACKAGE_NAME";
 
+@annotate
 class DataTable {
   name: string;
 }
 
-function decorateAll(Class: new (...args: any[]) => any) {
+function annotate(Class: new (...args: any[]) => any) {
   for (const propertyName of getClassProperties(Class)) {
-    const { type, nullable } = getClassPropertyType(Class, propertyName);
-    const options = nullable && { nullable: true };
-    __decorate([Column(() => type, options)], Class.prototype, propertyName);
+    const { typeFactory, nullable } = getClassPropertyType(Class, propertyName);
+    const options = nullable && { nullable };
+    __decorate([Column(typeFactory, options)], Class.prototype, propertyName);
   }
 }
 ```

@@ -1,14 +1,12 @@
 {
-  "name": "@proteriax/metadata",
+  "name": "@proteria/metadata",
   "version": "0.3.2",
   "description": "Babel plugin to emit decorator metadata like typescript compiler",
-  "main": "lib/plugin.js",
+  "main": "index.js",
+  "module": "index.mjs",
   "repository": "https://github.com/leonardfactory/babel-plugin-transform-typescript-metadata.git",
   "author": "Leonardo Ascione <leonardo.ascione@gmail.com>",
   "license": "MIT",
-  "files": [
-    "lib/"
-  ],
   "keywords": [
     "babel",
     "babel-plugin",
@@ -18,12 +16,12 @@
   ],
   "scripts": {
     "build": "rollup -c && ./scripts/build-package.json.js < package.json > lib/package.json",
-    "prebuild:lib": "rm -rf lib",
     "check-types": "tsc --noEmit",
     "release": "yarn test && yarn build && release-it",
     "test": "jest",
     "test:dev": "jest --watch",
-    "test:ci": "jest --ci --runInBand --coverage"
+    "test:ci": "jest --ci --runInBand --coverage",
+    "postinstall": "patch-package"
   },
   "husky": {
     "hooks": {
@@ -80,6 +78,7 @@
     "husky": "4.2.3",
     "jest": "^26.6.3",
     "jest-file-snapshot": "^0.5.0",
+    "patch-package": "^6.4.7",
     "prettier": "^2.2.1",
     "reflect-metadata": "^0.1.13",
     "regexp.escape": "^1.1.0",
@@ -89,7 +88,9 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "@babel/helper-module-imports": "^7.13.12"
+    "@babel/helper-module-imports": "^7.13.12",
+    "@babel/plugin-syntax-class-properties": "^7.12.13",
+    "tslib": "^2.2.0"
   },
   "upstream": {
     "repository": "git@github.com:leonardfactory/babel-plugin-transform-typescript-metadata.git",
@@ -105,6 +106,6 @@
     "lib"
   ],
   "peerDependencies": {
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "*"
   }
 }

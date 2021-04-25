@@ -8,5 +8,8 @@ expect.extend({ toMatchFile });
 export const createTests = (options: TransformOptions) =>
   create({
     prettier: prettier as any,
+    parserOpts: {
+      plugins: ["typescript", "classProperties", "decorators-legacy"],
+    },
     ...options,
   });

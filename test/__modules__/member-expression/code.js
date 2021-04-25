@@ -1,4 +1,5 @@
 import AWS from 'aws-sdk';
+import inject from 'pseudo-module'
 
 @Injectable()
 export class SomeService {

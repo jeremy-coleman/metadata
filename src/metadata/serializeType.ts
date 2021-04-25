@@ -1,5 +1,4 @@
-import { types as t } from "@babel/core";
-import { id } from "../util";
+import type { TransformContext, t } from "../babel";
 
 type InferArray<T> = T extends Array<infer A> ? A : never;
 
@@ -21,15 +20,13 @@ function Type(primary: SerializedType, parameters?: Type[]): Type {
   return { primary, parameters } as any;
 }
 
-interface SerializationContext {
+interface SerializationContext extends TransformContext {
   isSafeReference(reference: t.Identifier | t.MemberExpression): boolean;
 }
 
-const $undefined = t.identifier("undefined");
-
 function isSafeReference(reference: t.Identifier | t.MemberExpression) {
   return (
-    t.isIdentifier(reference) &&
+    reference.type === "Identifier" &&
     [
       "Array",
       "Boolean",
@@ -47,7 +44,19 @@ function isSafeReference(reference: t.Identifier | t.MemberExpression) {
 export class SerializeType {
   constructor(private readonly context: SerializationContext) {}
 
+  private serializeReference(
+    node: t.Identifier | t.TSQualifiedName
+  ): t.Identifier | t.MemberExpression {
+    const { t } = this.context;
+    if (node.type === "Identifier") {
+      return t.identifier(node.name);
+    }
+    return t.memberExpression(this.serializeReference(node.left), node.right);
+  }
+
   private serializeTypeReferenceNode(node: t.TSTypeReference): Type {
+    const { t, ids } = this.context;
+
     /**
      * We need to save references to this type since it is going
      * to be used as a Value (and not just as a Type) here.
@@ -55,7 +64,7 @@ export class SerializeType {
      * This is resolved in main plugin method, calling
      * `path.scope.crawl()` which updates the bindings.
      */
-    const reference = serializeReference(node.typeName);
+    const reference = this.serializeReference(node.typeName);
 
     const typeParams = node.typeParameters?.params.map(param =>
       this.serializeType(param)
@@ -78,7 +87,7 @@ export class SerializeType {
           t.unaryExpression("typeof", reference),
           t.stringLiteral("undefined")
         ),
-        id("Object"),
+        ids.Object,
         t.cloneDeep(reference)
       ),
       typeParams
@@ -94,8 +103,10 @@ export class SerializeType {
    *  https://github.com/Microsoft/TypeScript/blob/2932421370df720f0ccfea63aaf628e32e881429/src/compiler/transformers/ts.ts
    */
   public serializeType(node?: t.TSType): Type {
+    const { ids } = this.context;
+
     if (node === undefined) {
-      return Type(id("Object"));
+      return Type(ids.Object);
     }
 
     switch (node.type) {
@@ -103,39 +114,41 @@ export class SerializeType {
       case "TSUndefinedKeyword":
       case "TSNullKeyword":
       case "TSNeverKeyword":
-        return Type($undefined);
+        return Type(ids.undefined);
 
       case "TSParenthesizedType":
         return this.serializeType(node.typeAnnotation);
 
       case "TSFunctionType":
       case "TSConstructorType":
-        return Type(id("Function"));
+        return Type(ids.Function);
 
       case "TSArrayType":
+        return Type(ids.Array, [this.serializeType(node.elementType)]);
+
       case "TSTupleType":
-        return Type(id("Array"));
+        return Type(ids.Array);
 
       case "TSTypePredicate":
       case "TSBooleanKeyword":
-        return Type(id("Boolean"));
+        return Type(ids.Boolean);
 
       case "TSStringKeyword":
-        return Type(id("String"));
+        return Type(ids.String);
 
       case "TSObjectKeyword":
-        return Type(id("Object"));
+        return Type(ids.Object);
 
       case "TSLiteralType":
         switch (node.literal.type) {
           case "StringLiteral":
-            return Type(id("String"));
+            return Type(ids.String);
 
           case "NumericLiteral":
-            return Type(id("Number"));
+            return Type(ids.Number);
 
           case "BooleanLiteral":
-            return Type(id("Boolean"));
+            return Type(ids.Boolean);
 
           default:
             /**
@@ -146,10 +159,10 @@ export class SerializeType {
 
       case "TSNumberKeyword":
       case "TSBigIntKeyword" as any: // Still not in ``@babel/core` typings
-        return Type(id("Number"));
+        return Type(ids.Number);
 
       case "TSSymbolKeyword":
-        return Type(id("Symbol"));
+        return Type(ids.Symbol);
 
       case "TSTypeReference":
         return this.serializeTypeReferenceNode(node);
@@ -176,7 +189,7 @@ export class SerializeType {
         throw new Error("Bad type for decorator");
     }
 
-    return Type(t.identifier("Object"));
+    return Type(ids.Object);
   }
 
   /**
@@ -186,6 +199,7 @@ export class SerializeType {
    *  https://github.com/Microsoft/TypeScript/blob/2932421370df720f0ccfea63aaf628e32e881429/src/compiler/transformers/ts.ts
    */
   private serializeTypeList(types: readonly t.TSType[]): SerializedType {
+    const { t, ids } = this.context;
     let serializedUnion: SerializedType | undefined;
 
     for (let typeNode of types) {
@@ -220,7 +234,7 @@ export class SerializeType {
           !t.isIdentifier(serializedIndividual) ||
           serializedUnion.name !== serializedIndividual.name
         ) {
-          return t.identifier("Object");
+          return ids.Object;
         }
       } else {
         // Initialize the union type
@@ -229,15 +243,6 @@ export class SerializeType {
     }
 
     // If we were able to find common type, use it
-    return serializedUnion || $undefined; // Fallback is only hit if all union constituents are null/undefined/never
+    return serializedUnion || ids.undefined; // Fallback is only hit if all union constituents are null/undefined/never
   }
-}
-
-function serializeReference(
-  typeName: t.Identifier | t.TSQualifiedName
-): t.Identifier | t.MemberExpression {
-  if (typeName.type === "Identifier") {
-    return id(typeName.name);
-  }
-  return t.memberExpression(serializeReference(typeName.left), typeName.right);
 }

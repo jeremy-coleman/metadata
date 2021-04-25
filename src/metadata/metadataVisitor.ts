@@ -1,18 +1,16 @@
 import type { NodePath } from "@babel/traverse";
-import { types as t } from "@babel/core";
 import type { Type } from "./serializeType";
 import { SerializeType } from "./serializeType";
-import { arrowOf, id } from "../util";
-import type { TransformContext } from "../plugin";
+import type { TransformContext, t } from "../babel";
+import { addDecorator } from "../util";
 
-function assertNever(type: never) {}
+function assertNever(_type: never) {}
 
 function getTypeAnnotation(parent: {
   typeAnnotation: t.TypeAnnotation | t.TSTypeAnnotation | t.Noop | null;
 }): t.TSType | undefined {
   return (
-    (parent.typeAnnotation as t.TSTypeAnnotation | null)?.typeAnnotation ??
-    undefined
+    (parent.typeAnnotation as t.TSTypeAnnotation)?.typeAnnotation ?? undefined
   );
 }
 
@@ -59,9 +57,7 @@ function createIsSafeReference(classPath: NodePath<t.ClassDeclaration>) {
       case "MemberExpression":
         return isClassType(node.object);
       default:
-        throw new Error(
-          `The property expression at ${node.start} is not valid as a Type to be used in Reflect.metadata`
-        );
+        return false;
     }
   };
 }
@@ -71,91 +67,97 @@ export class MetadataVisitor {
     private classPath: NodePath<t.ClassDeclaration>,
     private context: TransformContext,
     private serializer = new SerializeType({
+      ...context,
       isSafeReference: createIsSafeReference(classPath),
     })
   ) {}
 
-  private fromAdvancedType(type: Type, optional?: boolean): t.CallExpression {
+  private fromType(
+    { primary, parameters }: Type,
+    optional?: boolean
+  ): t.CallExpression {
+    const { t, ids } = this.context;
     return t.callExpression(
       this.context.$createType,
       [
-        type.primary,
-        type.parameters &&
-          t.arrayExpression(type.parameters.map(t => this.fromAdvancedType(t))),
+        t.arrowFunctionExpression([], primary),
+        parameters && t.arrayExpression(parameters.map(t => this.fromType(t))),
         optional &&
           t.objectExpression([
-            t.objectProperty(id("optional"), t.booleanLiteral(true)),
+            t.objectProperty(ids.optional, t.booleanLiteral(true)),
           ]),
       ].filter(Boolean)
     );
   }
 
-  private *visitClassMethod(node: t.ClassMethod) {
-    const { createMetadataDecorator: create, $keys } = this.context;
+  private decorate(type: t.Expression, arg: t.Expression): t.CallExpression {
+    const { t, $reflectMetadata } = this.context;
+    return t.callExpression($reflectMetadata, [type, arg]);
+  }
 
-    yield create($keys.Type, id("Function"));
-    yield create(
-      $keys.ParamType,
-      arrowOf(
-        t.arrayExpression(
-          node.params.map(param =>
-            this.fromAdvancedType(
-              this.serializer.serializeType(findTypeNode(param)),
-              ("optional" in param && param.optional) || false
-            )
-          )
-        )
+  private *visitClassMethod(node: t.ClassMethod) {
+    const { keys, t, ids } = this.context;
+
+    yield this.decorate(keys.Type, ids.Function);
+
+    const paramTypes = node.params.map(param =>
+      this.fromType(
+        this.serializer.serializeType(findTypeNode(param)),
+        ("optional" in param && param.optional) || false
       )
     );
 
+    yield this.decorate(keys.ParamType, t.arrayExpression(paramTypes));
+
     if (node.returnType) {
-      yield create(
-        $keys.ReturnType,
-        arrowOf(
-          this.fromAdvancedType(
-            this.serializer.serializeType(
-              (node.returnType as t.TSTypeAnnotation).typeAnnotation
-            )
-          )
+      const returnType = this.fromType(
+        this.serializer.serializeType(
+          (node.returnType as t.TSTypeAnnotation).typeAnnotation
         )
       );
+
+      yield this.decorate(keys.ReturnType, returnType);
     }
   }
 
   private *visitClassProperty(field: t.ClassProperty) {
-    const { createMetadataDecorator: create, $keys } = this.context;
+    const { keys } = this.context;
 
     if (field.typeAnnotation?.type !== "TSTypeAnnotation") {
       return;
     }
 
-    yield create(
-      $keys.Type,
-      arrowOf(
-        this.fromAdvancedType(
-          this.serializer.serializeType(findTypeNode(field))
-        )
+    yield this.decorate(
+      keys.Type,
+      this.fromType(
+        this.serializer.serializeType(findTypeNode(field)),
+        ("optional" in field && field.optional) || false
       )
     );
   }
 
   visit(path: NodePath<t.ClassProperty | t.ClassMethod>) {
+    const { context } = this;
+    const { t, decoratedOnly } = context;
     const field = path.node;
     const classNode = this.classPath.node;
 
+    if (field.static && !context.static) {
+      return;
+    }
+
     switch (field.type) {
       case "ClassMethod":
-        const decorators =
-          field.kind === "constructor"
-            ? (classNode.decorators ??= [])
-            : (field.decorators ??= []);
-
-        decorators.push(...this.visitClassMethod(field));
+        const target = field.kind === "constructor" ? classNode : field;
+        if (!decoratedOnly || target.decorators?.length) {
+          addDecorator(t, target, ...this.visitClassMethod(field));
+        }
         break;
 
       case "ClassProperty":
-        field.decorators ??= [];
-        field.decorators!.push(...this.visitClassProperty(field));
+        if (!decoratedOnly || field.decorators?.length) {
+          addDecorator(t, field, ...this.visitClassProperty(field));
+        }
         break;
     }
   }

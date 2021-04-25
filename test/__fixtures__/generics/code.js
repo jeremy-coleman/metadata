@@ -17,4 +17,8 @@ class MyClass {
   method3(): Promise<string> {}
 
   method4(argument?: Promise<Generic<A>>) {}
+
+  optional?: number
+
+  arrays: number[]
 }

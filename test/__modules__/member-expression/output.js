@@ -7,20 +7,20 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.SomeService = void 0;
 
-var _runtime = require("@proteriax/metadata/runtime");
+var _metadata = require("@proteria/metadata");
 
 var _awsSdk = _interopRequireDefault(require("aws-sdk"));
 
 @Injectable()
-@_dec
-@Reflect.metadata(_runtime.DesignType.Type, Function)
-@Reflect.metadata(_DesignType.ParamType, () => [
-  (0, _runtime.createType)(
+@_decorateArgument
+@Reflect.metadata(_metadata.DesignType.Type, Function)
+@Reflect.metadata(_metadata.DesignType.ParamType, [
+  (0, _metadata.createType)(() =>
     typeof _awsSdk.default.S3 === "undefined" ? Object : _awsSdk.default.S3
   ),
 ])
-@Reflect.metadata(_DesignType.PropertyList, ["s3client"])
-@Reflect.metadata(_DesignType.MethodList, [])
+@Reflect.metadata(_metadata.DesignType.PropertyList, [])
+@Reflect.metadata(_metadata.DesignType.MethodList, ["s3client"])
 class SomeService {
   constructor(s3client) {
     this.s3client = s3client;
@@ -29,6 +29,6 @@ class SomeService {
 
 exports.SomeService = SomeService;
 
-function _dec(target, key) {
+function _decorateArgument(target, key) {
   return Inject("aws.s3")(target, undefined, 0);
 }

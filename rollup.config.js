@@ -24,7 +24,7 @@ const build = (input, output, format) => ({
 });
 
 export default [
-  build("./src/plugin.ts", "./lib/plugin.js", "cjs"),
-  build("./src/runtime.ts", "./lib/runtime.js", "cjs"),
-  build("./src/runtime.ts", "./lib/runtime.mjs", "esm"),
+  build("./src/babel.ts", "./lib/babel.js", "cjs"),
+  build("./src/index.ts", "./lib/index.js", "cjs"),
+  build("./src/index.ts", "./lib/index.mjs", "esm"),
 ];
