@@ -1,0 +1,168 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@proteria/metadata</title>
+	<meta name="description" content="Documentation for @proteria/metadata">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+	<script async src="assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@proteria/metadata</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<h1>@proteria/metadata</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#metadata" id="metadata" style="color: inherit; text-decoration: none;">
+					<h1>metadata</h1>
+				</a>
+				<p>Babel plugin to emit decorator extensive metadata information like TypeScript
+					compiler, but works with lazy initialization, circular dependencies, generics
+				and optional types.</p>
+				<a href="#getting-started" id="getting-started" style="color: inherit; text-decoration: none;">
+					<h2>Getting Started</h2>
+				</a>
+				<p>In your <code>.babelrc</code> or other Babel configuration file, add the following:</p>
+				<pre><code class="language-json"><span style="color: #000000">{</span>
+<span style="color: #000000">  </span><span style="color: #0451A5">&quot;plugins&quot;</span><span style="color: #000000">: [</span>
+<span style="color: #000000">    </span><span style="color: #A31515">&quot;PENDING_PACKAGE_NAME&quot;</span><span style="color: #000000">,</span>
+<span style="color: #000000">    [</span><span style="color: #A31515">&quot;@babel/plugin-proposal-decorators&quot;</span><span style="color: #000000">, { </span><span style="color: #0451A5">&quot;legacy&quot;</span><span style="color: #000000">: </span><span style="color: #0000FF">true</span><span style="color: #000000"> }],</span>
+<span style="color: #000000">    [</span><span style="color: #A31515">&quot;@babel/plugin-proposal-class-properties&quot;</span><span style="color: #000000">, { </span><span style="color: #0451A5">&quot;loose&quot;</span><span style="color: #000000">: </span><span style="color: #0000FF">true</span><span style="color: #000000"> }]</span>
+<span style="color: #000000">  ]</span>
+<span style="color: #000000">}</span>
+</code></pre>
+				<a href="#example" id="example" style="color: inherit; text-decoration: none;">
+					<h2>Example</h2>
+				</a>
+				<pre><code class="language-ts"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">__decorate</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;tslib&quot;</span><span style="color: #000000">;</span>
+<span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">Column</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;typeorm&quot;</span><span style="color: #000000">;</span>
+<span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">getClassProperties</span><span style="color: #000000">, </span><span style="color: #001080">getClassPropertyType</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;PENDING_PACKAGE_NAME&quot;</span><span style="color: #000000">;</span>
+
+<span style="color: #000000">@</span><span style="color: #001080">annotate</span>
+<span style="color: #0000FF">class</span><span style="color: #000000"> </span><span style="color: #267F99">DataTable</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #001080">name</span><span style="color: #000000">: </span><span style="color: #267F99">string</span><span style="color: #000000">;</span>
+<span style="color: #000000">}</span>
+
+<span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">annotate</span><span style="color: #000000">(</span><span style="color: #001080">Class</span><span style="color: #000000">: </span><span style="color: #AF00DB">new</span><span style="color: #000000"> (...</span><span style="color: #001080">args</span><span style="color: #000000">: </span><span style="color: #267F99">any</span><span style="color: #000000">[]) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #267F99">any</span><span style="color: #000000">) {</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">for</span><span style="color: #000000"> (</span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">propertyName</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #795E26">getClassProperties</span><span style="color: #000000">(</span><span style="color: #001080">Class</span><span style="color: #000000">)) {</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">typeFactory</span><span style="color: #000000">, </span><span style="color: #0070C1">nullable</span><span style="color: #000000"> } = </span><span style="color: #795E26">getClassPropertyType</span><span style="color: #000000">(</span><span style="color: #001080">Class</span><span style="color: #000000">, </span><span style="color: #001080">propertyName</span><span style="color: #000000">);</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">options</span><span style="color: #000000"> = </span><span style="color: #001080">nullable</span><span style="color: #000000"> &amp;&amp; { </span><span style="color: #001080">nullable</span><span style="color: #000000"> };</span>
+<span style="color: #000000">    </span><span style="color: #795E26">__decorate</span><span style="color: #000000">([</span><span style="color: #795E26">Column</span><span style="color: #000000">(</span><span style="color: #001080">typeFactory</span><span style="color: #000000">, </span><span style="color: #001080">options</span><span style="color: #000000">)], </span><span style="color: #267F99">Class</span><span style="color: #000000">.</span><span style="color: #001080">prototype</span><span style="color: #000000">, </span><span style="color: #001080">propertyName</span><span style="color: #000000">);</span>
+<span style="color: #000000">  }</span>
+<span style="color: #000000">}</span>
+</code></pre>
+				<a href="#working-with-libraries-that-use-typescript-metadata" id="working-with-libraries-that-use-typescript-metadata" style="color: inherit; text-decoration: none;">
+					<h3>Working with libraries that use TypeScript metadata</h3>
+				</a>
+				<p>You can decorate classes with <code>emitDecoratorMetadata</code> to enable interop
+				with libraries that use TypeScript emitted metadata.</p>
+				<pre><code class="language-ts"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">emitDecoratorMetadata</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;PENDING_PACKAGE_NAME&quot;</span><span style="color: #000000">;</span>
+
+<span style="color: #000000">@</span><span style="color: #001080">emitDecoratorMetadata</span>
+<span style="color: #0000FF">class</span><span style="color: #000000"> </span><span style="color: #267F99">Person</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #001080">firstName</span><span style="color: #000000">: </span><span style="color: #267F99">string</span><span style="color: #000000">;</span>
+<span style="color: #000000">  </span><span style="color: #001080">middleName</span><span style="color: #000000">?: </span><span style="color: #267F99">string</span><span style="color: #000000">;</span>
+<span style="color: #000000">  </span><span style="color: #001080">lastName</span><span style="color: #000000">: </span><span style="color: #267F99">string</span><span style="color: #000000">;</span>
+
+<span style="color: #000000">  </span><span style="color: #795E26">getName</span><span style="color: #000000">() {</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">return</span><span style="color: #000000"> </span><span style="color: #0000FF">this</span><span style="color: #000000">.</span><span style="color: #001080">firstName</span><span style="color: #000000"> + </span><span style="color: #A31515">&quot; &quot;</span><span style="color: #000000"> + </span><span style="color: #0000FF">this</span><span style="color: #000000">.</span><span style="color: #001080">lastName</span><span style="color: #000000">;</span>
+<span style="color: #000000">  }</span>
+<span style="color: #000000">}</span>
+</code></pre>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="modules.html">Exports</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-enum">
+						<a href="enums/designtype.html" class="tsd-kind-icon">Design<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="modules.html#emitdecoratormetadata" class="tsd-kind-icon">emit<wbr>Decorator<wbr>Metadata</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="modules.html#getclassmethodarguments" class="tsd-kind-icon">get<wbr>Class<wbr>Method<wbr>Arguments</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="modules.html#getclassmethodreturntype" class="tsd-kind-icon">get<wbr>Class<wbr>Method<wbr>Return<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#getclassmethods" class="tsd-kind-icon">get<wbr>Class<wbr>Methods</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#getclassproperties" class="tsd-kind-icon">get<wbr>Class<wbr>Properties</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="modules.html#getclasspropertytype" class="tsd-kind-icon">get<wbr>Class<wbr>Property<wbr>Type</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
