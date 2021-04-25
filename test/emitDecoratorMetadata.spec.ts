@@ -1,9 +1,5 @@
 import "reflect-metadata";
 import * as babel from "@babel/core";
-import { name } from "../package.json";
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const runtime = require("../src/index");
 
 const _module = { exports: {} };
 
@@ -11,7 +7,7 @@ function javascript(code: TemplateStringsArray) {
   const source = babel.transform(code.join(""), {
     presets: [["@babel/preset-typescript", { allExtensions: true }]],
     plugins: [
-      require.resolve("../src/babel"),
+      [require.resolve("../src/babel"), { importPath: "../src/index" }],
       "@babel/plugin-transform-runtime",
       ["@babel/plugin-proposal-decorators", { legacy: true }],
       "@babel/plugin-proposal-class-properties",
@@ -19,9 +15,9 @@ function javascript(code: TemplateStringsArray) {
     ],
   }).code!;
 
-  eval(/* javascript */ `(function (module, exports, require) { 
+  eval(/* javascript */ `(function (module, exports) { 
     ${source} 
-  })(_module, _module.exports, name => name === "${name}" ? runtime : require(name))`);
+  })(_module, _module.exports)`);
   return _module.exports as any;
 }
 

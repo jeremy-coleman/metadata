@@ -30,6 +30,11 @@ export interface PluginOptions {
    * Emit types for static methods. Default is true
    */
   static?: boolean;
+
+  /**
+   * Path to import runtime functions from. Optional.
+   */
+  importPath?: string;
 }
 
 export type { t };
@@ -43,22 +48,6 @@ export interface TransformContext extends PluginOptions {
   $createType: t.Identifier;
   keys: DesignTypeKeys;
 }
-
-const getNamedImport = (
-  t: types,
-  path: NodePath<t.Program>,
-  identifier: RuntimeExport,
-  suggestedName: string = identifier
-) => {
-  const newID = path.scope.generateUidIdentifier(suggestedName);
-  path.node.body.unshift(
-    t.importDeclaration(
-      [t.importSpecifier(newID, t.identifier(identifier))],
-      t.stringLiteral(name)
-    )
-  );
-  return () => t.cloneNode(newID);
-};
 
 const sharedIds = (t: types) => ({
   Array: t.identifier("Array"),
@@ -82,6 +71,22 @@ export default (
   const { identifier: id } = t;
   const ids = sharedIds(t);
   options = { decoratedOnly: false, static: true, ...options };
+
+  const getNamedImport = (
+    t: types,
+    path: NodePath<t.Program>,
+    identifier: RuntimeExport,
+    suggestedName: string = identifier
+  ) => {
+    const newID = path.scope.generateUidIdentifier(suggestedName);
+    path.node.body.unshift(
+      t.importDeclaration(
+        [t.importSpecifier(newID, t.identifier(identifier))],
+        t.stringLiteral(options.importPath ?? name)
+      )
+    );
+    return () => t.cloneNode(newID);
+  };
 
   const Program: VisitNode<PluginPass, t.Program> = programPath => {
     const $createType = getNamedImport(t, programPath, "createType", "type");

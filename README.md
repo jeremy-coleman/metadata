@@ -1,4 +1,4 @@
-# babel-annotate
+# metadata
 
 Babel plugin to emit decorator extensive metadata information like TypeScript
 compiler, but works with lazy initialization, circular dependencies, generics
