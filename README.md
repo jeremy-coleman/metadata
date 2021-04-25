@@ -38,3 +38,23 @@ function annotate(Class: new (...args: any[]) => any) {
   }
 }
 ```
+
+### Working with libraries that use TypeScript metadata
+
+You can decorate classes with `emitDecoratorMetadata` to enable interop
+with libraries that use TypeScript emitted metadata.
+
+```ts
+import { emitDecoratorMetadata } from "PENDING_PACKAGE_NAME";
+
+@emitDecoratorMetadata
+class Person {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+
+  getName() {
+    return this.firstName + " " + this.lastName;
+  }
+}
+```

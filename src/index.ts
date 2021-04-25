@@ -124,10 +124,10 @@ const toTSType = (type: TypeInformation) =>
 
 /**
  * Compatibility layer with `emitDecoratorMetadata`. Class decorated with
- * `toReflectMetadata` will have the same metadata as if compiled by TypeScript
+ * `emitDecoratorMetadata` will have the same metadata as if compiled by TypeScript
  * with `emitDecoratorMetadata` enabled.
  */
-export const toReflectMetadata: ClassDecorator = (Class: any) => {
+export const emitDecoratorMetadata: ClassDecorator = (Class: any) => {
   for (const method of getClassMethods(Class)) {
     try {
       const type = getClassMethodArguments(Class, method).map(toTSType);

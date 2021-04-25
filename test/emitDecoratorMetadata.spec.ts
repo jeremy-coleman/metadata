@@ -25,10 +25,10 @@ describe("emitDecoratorMetadata layer", () => {
   it("extracts correct types", () => {
     const { A } = javascript`
 
-    import { toReflectMetadata } from "../src/index"
+    import { emitDecoratorMetadata } from "../src/index"
     const dec: any = () => {}
 
-    @toReflectMetadata
+    @emitDecoratorMetadata
     export class A {
       @dec
       string!: string;
