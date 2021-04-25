@@ -90,15 +90,10 @@ export class MetadataVisitor {
     );
   }
 
-  private decorate(type: t.Expression, arg: t.Expression): t.CallExpression {
-    const { t, $reflectMetadata } = this.context;
-    return t.callExpression($reflectMetadata, [type, arg]);
-  }
-
   private *visitClassMethod(node: t.ClassMethod) {
-    const { keys, t, ids } = this.context;
+    const { keys, t, ids, createMetadataDecorator: decorate } = this.context;
 
-    yield this.decorate(keys.Type, ids.Function);
+    yield decorate(keys.Type, ids.Function);
 
     const paramTypes = node.params.map(param =>
       this.fromType(
@@ -107,7 +102,7 @@ export class MetadataVisitor {
       )
     );
 
-    yield this.decorate(keys.ParamType, t.arrayExpression(paramTypes));
+    yield decorate(keys.ParamType, t.arrayExpression(paramTypes));
 
     if (node.returnType) {
       const returnType = this.fromType(
@@ -116,18 +111,18 @@ export class MetadataVisitor {
         )
       );
 
-      yield this.decorate(keys.ReturnType, returnType);
+      yield decorate(keys.ReturnType, returnType);
     }
   }
 
   private *visitClassProperty(field: t.ClassProperty) {
-    const { keys } = this.context;
+    const { keys, createMetadataDecorator: decorate } = this.context;
 
     if (field.typeAnnotation?.type !== "TSTypeAnnotation") {
       return;
     }
 
-    yield this.decorate(
+    yield decorate(
       keys.Type,
       this.fromType(
         this.serializer.serializeType(findTypeNode(field)),

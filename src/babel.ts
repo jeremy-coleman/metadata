@@ -1,7 +1,7 @@
 import type * as babel from "@babel/core";
 import type { PluginPass, PluginObj, ConfigAPI } from "@babel/core";
 import type { VisitNode } from "@babel/traverse";
-import type { NodePath, types as t } from "@babel/core";
+import type { types as t } from "@babel/core";
 import { ParameterVisitor } from "./parameter/parameterVisitor";
 import { MetadataVisitor } from "./metadata/metadataVisitor";
 import { addDecorator } from "./util";
@@ -40,11 +40,17 @@ export interface PluginOptions {
 export type { t };
 export type types = typeof t;
 
-/** @internal */
+/**
+ * Global transformation context shared across all transform functions
+ * @internal
+ */
 export interface TransformContext extends PluginOptions {
   t: types;
   ids: ReturnType<typeof sharedIds>;
-  $reflectMetadata: t.MemberExpression;
+  createMetadataDecorator: (
+    key: t.Expression,
+    arg: t.Expression
+  ) => t.CallExpression;
   $createType: t.Identifier;
   keys: DesignTypeKeys;
 }
@@ -72,27 +78,34 @@ export default (
   const ids = sharedIds(t);
   options = { decoratedOnly: false, static: true, ...options };
 
-  const getNamedImport = (
-    t: types,
-    path: NodePath<t.Program>,
-    identifier: RuntimeExport,
-    suggestedName: string = identifier
-  ) => {
-    const newID = path.scope.generateUidIdentifier(suggestedName);
-    path.node.body.unshift(
-      t.importDeclaration(
-        [t.importSpecifier(newID, t.identifier(identifier))],
-        t.stringLiteral(options.importPath ?? name)
-      )
-    );
-    return () => t.cloneNode(newID);
-  };
-
   const Program: VisitNode<PluginPass, t.Program> = programPath => {
-    const $createType = getNamedImport(t, programPath, "createType", "type");
-    const $designType = getNamedImport(t, programPath, "DesignType");
+    /**
+     * Inserts a named import to the top of the program.
+     * @param identifier Importee
+     * @param suggestedName Suggested local identifier name
+     * @returns An identifier factory that refers to the local import.
+     */
+    const getNamedImport = (
+      identifier: RuntimeExport,
+      suggestedName: string = identifier
+    ) => {
+      const newID = programPath.scope.generateUidIdentifier(suggestedName);
+      programPath.node.body.unshift(
+        t.importDeclaration(
+          [t.importSpecifier(newID, t.identifier(identifier))],
+          t.stringLiteral(options.importPath ?? name)
+        )
+      );
+      return () => t.cloneNode(newID);
+    };
+
+    const $createType = getNamedImport("createType", "type");
+    const $designType = getNamedImport("DesignType");
     const $reflectMetadata = t.memberExpression(id("Reflect"), id("metadata"));
 
+    /**
+     * Returns a `Reflect.metadata` call expression
+     */
     const createMetadataDecorator = (key: t.Expression, arg: t.Expression) =>
       t.callExpression($reflectMetadata, [key, arg]);
 
@@ -119,7 +132,7 @@ export default (
           get $createType() {
             return $createType();
           },
-          $reflectMetadata,
+          createMetadataDecorator,
           keys,
           t,
           ids,

@@ -18,7 +18,7 @@ export enum DesignType {
 /** @internal */
 export function createType(
   typeFactory: any,
-  params?: any[],
+  params: any[] = [],
   options?: Record<string, any>
 ) {
   if (!Array.isArray(params)) {
@@ -46,21 +46,51 @@ type Type =
   | (new (...args: any[]) => any)
   | Record<string, string | number>; // enum
 
-interface TypeInformation {
+export interface TypeInformation {
+  /**
+   * Class constructor for the main type. A `string` type is represented
+   * by the global `StringConstructor`, and an `array` is represented
+   * by the global `ArrayConstructor`, etc.
+   *
+   * This is a getter property and will trigger a `ReferenceError` if the
+   * class is in [temporal dead zone](https://2ality.com/2015/10/why-tdz.html).
+   */
   type: Type;
+
+  /**
+   * Function that returns the class constructor. Most libraries that use
+   * decorator metadata accept a type factory function, which is provided here.
+   * @see [[TypeInformation.type]]
+   */
   typeFactory: () => Type;
+
+  /**
+   * Type parameters if this type is generic. For example, `string[]` will be
+   * represented by `{ type: Array, params: [{ type: String }] }`. This can be
+   * an empty array if there is no type parameter.
+   */
   params: TypeInformation[];
+
+  /**
+   * True if this type can also be `undefined`, and false or undefined if otherwise.
+   */
   nullable?: boolean;
 }
 
+/** Returns a list of keys where the value `extends Condition` */
 type PickKeyBy<T, Condition> = {
   [key in keyof T]: T[key] extends Condition ? key : never;
 }[keyof T];
 
+/** Returns a list of keys where the value does not `extends Condition` */
 type OmitKeyBy<T, Condition> = {
   [key in keyof T]: T[key] extends Condition ? never : key;
 }[keyof T];
 
+/**
+ * Returns a list of class property names.
+ * @param Class Class constructor
+ */
 export function getClassProperties(
   Class: new (...args: any[]) => any
 ): string[] {
@@ -124,6 +154,7 @@ export function getClassPropertyType<T = any>(
   );
 }
 
+/** Compatibility: TypeScript compiler converts nullable types to `Object`. */
 const toTSType = (type: TypeInformation) =>
   type.nullable ? Object : type.type;
 

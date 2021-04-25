@@ -11,7 +11,7 @@ In your `.babelrc` or other Babel configuration file, add the following:
 ```json
 {
   "plugins": [
-    "PENDING_PACKAGE_NAME",
+    "@proteria/metadata/babel",
     ["@babel/plugin-proposal-decorators", { "legacy": true }],
     ["@babel/plugin-proposal-class-properties", { "loose": true }]
   ]
@@ -20,14 +20,17 @@ In your `.babelrc` or other Babel configuration file, add the following:
 
 ## Example
 
+To generate field decorators automatically with `typeorm`:
+
 ```ts
 import { __decorate } from "tslib";
 import { Column } from "typeorm";
-import { getClassProperties, getClassPropertyType } from "PENDING_PACKAGE_NAME";
+import { getClassProperties, getClassPropertyType } from "@proteria/metadata";
 
 @annotate
 class DataTable {
   name: string;
+  id: number;
 }
 
 function annotate(Class: new (...args: any[]) => any) {
