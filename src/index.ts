@@ -1,12 +1,17 @@
 import "reflect-metadata";
 import { __decorate, __metadata } from "tslib";
 
+/**
+ * `metadataKey`s used to denote type information.
+ */
 export enum DesignType {
   Type = "metadata.type",
   ParamType = "metadata.param_types",
   ReturnType = "metadata.return_type",
   TypeInfo = "metadata.type_info",
+  /** List of class property names (excluding symbols) */
   PropertyList = "metadata.property_list",
+  /** List of class method names (excluding symbols) */
   MethodList = "metadata.method_list",
 }
 
