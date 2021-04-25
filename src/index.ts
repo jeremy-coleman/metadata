@@ -3,6 +3,7 @@ import { __decorate, __metadata } from "tslib";
 
 /**
  * `metadataKey`s used to denote type information.
+ * @internal
  */
 export enum DesignType {
   Type = "metadata.type",
@@ -46,6 +47,10 @@ type Type =
   | (new (...args: any[]) => any)
   | Record<string, string | number>; // enum
 
+/**
+ * Runtime type information containing the type constructor, and optionally type
+ * parameters plus its nullability.
+ */
 export interface TypeInformation {
   /**
    * Class constructor for the main type. A `string` type is represented
@@ -139,7 +144,7 @@ export function getClassMethodReturnType<T = any>(
 }
 
 /**
- * Returns a function that returns the type information of a class property.
+ * Returns the type information of a class property.
  * @param Class Class constructor
  * @param key Property name
  */
