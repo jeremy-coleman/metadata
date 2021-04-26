@@ -168,12 +168,14 @@ export const emitDecoratorMetadata: ClassDecorator = (Class: any) => {
   }
 
   for (const property of getClassProperties(Class)) {
-    const type = toTSType(getClassPropertyType(Class, property));
-    __decorate(
-      [__metadata("design:type", type)],
-      Class.prototype,
-      property,
-      undefined
-    );
+    try {
+      const type = toTSType(getClassPropertyType(Class, property));
+      __decorate(
+        [__metadata("design:type", type)],
+        Class.prototype,
+        property,
+        undefined
+      );
+    } catch {}
   }
 };
