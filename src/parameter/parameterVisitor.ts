@@ -1,5 +1,4 @@
 import type { NodePath } from "@babel/traverse";
-import { addDecorator } from "../util";
 import type { TransformContext, t } from "../babel";
 
 /**
@@ -24,7 +23,7 @@ export class ParameterVisitor {
 
   // eslint-disable-next-line class-methods-use-this
   public visit(path: NodePath<t.ClassMethod> | NodePath<t.ClassProperty>) {
-    const { t, ids } = this.context;
+    const { t, ids, addDecorator } = this.context;
 
     if (path.type !== "ClassMethod") return;
     if (path.node.key.type !== "Identifier") return;
@@ -70,7 +69,7 @@ export class ParameterVisitor {
           )
         );
 
-        addDecorator(t, target, dec);
+        addDecorator(target, dec);
       }
 
       (param.node as t.Identifier).decorators = null;

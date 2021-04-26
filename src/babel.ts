@@ -2,15 +2,14 @@ import type * as babel from "@babel/core";
 import type { PluginPass, PluginObj, ConfigAPI } from "@babel/core";
 import type { VisitNode } from "@babel/traverse";
 import type { types as t } from "@babel/core";
+import type { DesignType } from "./index";
 import { ParameterVisitor } from "./parameter/parameterVisitor";
 import { MetadataVisitor } from "./metadata/metadataVisitor";
-import { addDecorator } from "./util";
-import type { DesignType } from "./index";
 import { name } from "../package.json";
 
 export type BabelAPI = typeof babel & ConfigAPI;
 
-import type * as runtime from "./index";
+import type * as runtime from "./runtime";
 type RuntimeExport = keyof typeof runtime;
 
 type DesignTypeKey = keyof typeof DesignType;
@@ -53,6 +52,10 @@ export interface TransformContext extends PluginOptions {
   ) => t.CallExpression;
   $createType: t.Identifier;
   keys: DesignTypeKeys;
+  addDecorator(
+    node: { decorators?: t.Decorator[] | null },
+    ...decorator: (t.Expression | t.Expression[])[]
+  ): void;
 }
 
 const sharedIds = (t: types) => ({
@@ -137,7 +140,14 @@ export default (
           t,
           ids,
           ...options,
+          addDecorator(node, ...decorator) {
+            node.decorators ??= [];
+            node.decorators.push(
+              ...decorator.flat(2).map(dec => t.decorator(dec))
+            );
+          },
         };
+
         const fields = {
           ClassMethod: new Set<string>(),
           ClassProperty: new Set<string>(),
@@ -178,7 +188,7 @@ export default (
         }
 
         if (!context.decoratedOnly || path.node.decorators?.length) {
-          addDecorator(t, path.node, [
+          context.addDecorator(path.node, [
             createMetadataDecorator(
               keys.PropertyList,
               t.arrayExpression(

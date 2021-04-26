@@ -7,7 +7,7 @@ function javascript(code: TemplateStringsArray) {
   const source = babel.transform(code.join(""), {
     presets: [["@babel/preset-typescript", { allExtensions: true }]],
     plugins: [
-      [require.resolve("../src/babel"), { importPath: "../src/index" }],
+      [require.resolve("../src/babel"), { importPath: "../src/runtime" }],
       "@babel/plugin-transform-runtime",
       ["@babel/plugin-proposal-decorators", { legacy: true }],
       "@babel/plugin-proposal-class-properties",

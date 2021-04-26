@@ -2,7 +2,6 @@ import type { NodePath } from "@babel/traverse";
 import type { Type } from "./serializeType";
 import { SerializeType } from "./serializeType";
 import type { TransformContext, t } from "../babel";
-import { addDecorator } from "../util";
 
 function assertNever(_type: never) {}
 
@@ -133,7 +132,7 @@ export class MetadataVisitor {
 
   visit(path: NodePath<t.ClassProperty | t.ClassMethod>) {
     const { context } = this;
-    const { t, decoratedOnly } = context;
+    const { decoratedOnly, addDecorator } = context;
     const field = path.node;
     const classNode = this.classPath.node;
 
@@ -145,13 +144,13 @@ export class MetadataVisitor {
       case "ClassMethod":
         const target = field.kind === "constructor" ? classNode : field;
         if (!decoratedOnly || target.decorators?.length) {
-          addDecorator(t, target, ...this.visitClassMethod(field));
+          addDecorator(target, ...this.visitClassMethod(field));
         }
         break;
 
       case "ClassProperty":
         if (!decoratedOnly || field.decorators?.length) {
-          addDecorator(t, field, ...this.visitClassProperty(field));
+          addDecorator(field, ...this.visitClassProperty(field));
         }
         break;
     }

@@ -1,4 +1,5 @@
-docs
+docs/*
+!docs/custom.scss
 
 # Logs
 logs

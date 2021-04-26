@@ -1,0 +1,34 @@
+@media (prefers-color-scheme: dark) {
+  body {
+    --color-background: #121212;
+    --color-panel: #151515;
+    --color-panel-divider: #222;
+    --color-toolbar: #151515;
+    --color-text: #ddd;
+    --color-toolbar-text: #ccc;
+  }
+  .tsd-select .tsd-select-list li:before,
+  .tsd-select .tsd-select-label:before,
+  .tsd-widget:before {
+    filter: invert(1);
+  }
+
+  @mixin replace($origin, $dark) {
+    .language-json,
+    .language-ts {
+      span[style^="color: #{'' + $origin}" i] {
+        color: $dark !important;
+      }
+    }
+  }
+
+  @include replace(#000000, #f2f0ed);
+  @include replace(#0000ff, #2b7dff);
+  @include replace(#001080, #7fb9ff);
+  @include replace(#0070c1, #54bfff);
+  @include replace(#267f99, #69c8e3);
+  @include replace(#795e26, #e1c383);
+  @include replace(#af00db, #df2bff);
+  @include replace(#a31515, #f55d5d);
+  @include replace(#0451a5, #68bfff);
+}
