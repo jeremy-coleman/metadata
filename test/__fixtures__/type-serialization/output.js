@@ -1,5 +1,13 @@
-import { DesignType as _DesignType } from "@proteria/metadata";
-import { createType as _type } from "@proteria/metadata";
+import {
+  createType as _type,
+  DesignType as _DesignType,
+  ArrayType as _ArrayType,
+  NumberType as _NumberType,
+  StringType as _StringType,
+  BooleanType as _BooleanType,
+  ObjectType as _ObjectType,
+  FunctionType as _FunctionType,
+} from "@proteria/metadata";
 import { Decorate } from "./Decorate";
 const sym = Symbol();
 
@@ -8,23 +16,23 @@ const sym = Symbol();
 @Reflect.metadata(_DesignType.ParamType, [
   _type(() => String),
   _type(() => Number),
-  _type(() => Number),
-  _type(() => String),
-  _type(() => Boolean),
-  _type(() => String),
-  _type(() => Number),
+  _type(_NumberType),
+  _type(_StringType),
+  _type(_BooleanType),
+  _type(_StringType),
+  _type(_NumberType),
   _type(() => Object),
-  _type(() => Function),
-  _type(() => Object),
-  _type(() => Object),
+  _type(_FunctionType),
+  _type(_ObjectType),
+  _type(_ObjectType),
   _type(() => Function),
   _type(() => undefined),
   _type(() => undefined),
-  _type(() => Object),
-  _type(() => Function),
-  _type(() => Boolean),
-  _type(() => Boolean),
-  _type(() => Object),
+  _type(_ObjectType),
+  _type(_FunctionType),
+  _type(_BooleanType),
+  _type(_BooleanType),
+  _type(_ObjectType),
 ])
 @Reflect.metadata(_DesignType.PropertyList, [])
 @Reflect.metadata(_DesignType.MethodList, [
@@ -63,25 +71,25 @@ class Sample {
   @Reflect.metadata(_DesignType.Type, Function)
   @Reflect.metadata(_DesignType.ParamType, [
     _type(() => Symbol),
-    _type(() => Object),
-    _type(() => String),
+    _type(_ObjectType),
+    _type(_StringType),
     _type(() => undefined),
-    _type(() => String),
-    _type(() => String),
+    _type(_StringType),
+    _type(_StringType),
     _type(() => (typeof Maybe === "undefined" ? Object : Maybe), [
-      _type(() => String),
+      _type(_StringType),
     ]),
-    _type(() => Object),
-    _type(() => Object),
-    _type(() => Array, [_type(() => String)]),
-    _type(() => Array),
+    _type(_ObjectType),
+    _type(_ObjectType),
+    _type(_ArrayType, [_type(_StringType)]),
+    _type(_ArrayType),
     _type(() => undefined),
-    _type(() => Boolean),
+    _type(_BooleanType),
     _type(() => undefined),
+    _type(_ObjectType),
     _type(() => Object),
-    _type(() => Object),
-    _type(() => Object),
-    _type(() => Number),
+    _type(_ObjectType),
+    _type(_NumberType),
   ])
   method(
     p0,
@@ -110,7 +118,7 @@ class Sample {
   @Decorate()
   @Reflect.metadata(_DesignType.Type, Function)
   @Reflect.metadata(_DesignType.ParamType, [
-    _type(() => Object),
+    _type(_ObjectType),
     _type(() =>
       typeof Decorate.Name === "undefined" ? Object : Decorate.Name
     ),
@@ -122,7 +130,7 @@ class Sample {
 
   @Decorate()
   @Reflect.metadata(_DesignType.Type, Function)
-  @Reflect.metadata(_DesignType.ParamType, [_type(() => Object)])
+  @Reflect.metadata(_DesignType.ParamType, [_type(_ObjectType)])
   assignments(p0 = "abc") {}
 }
 

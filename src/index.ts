@@ -46,6 +46,12 @@ export interface TypeInformation {
    * True if this type can also be `undefined`, and false or undefined if otherwise.
    */
   nullable?: boolean;
+
+  /**
+   * Initial value. Only available for class properties that are immediately assigned
+   * a literal value.
+   */
+  value?: any;
 }
 
 /** Returns a list of keys where the value `extends Condition` */
@@ -176,6 +182,13 @@ export const emitDecoratorMetadata: ClassDecorator = (Class: any) => {
         property,
         undefined
       );
-    } catch {}
+    } catch {
+      __decorate(
+        [__metadata("design:type", Object)],
+        Class.prototype,
+        property,
+        undefined
+      );
+    }
   }
 };

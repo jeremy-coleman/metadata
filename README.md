@@ -20,13 +20,17 @@ In your `.babelrc` or other Babel configuration file, add the following:
 }
 ```
 
+## API
+
+[Documentation](https://proteriax.github.io/metadata)
+
 ## Example
 
 To generate field decorators automatically with `typeorm`:
 
 ```ts
-import { __decorate } from "tslib";
 import { Column } from "typeorm";
+import { __decorate as decorate } from "tslib";
 import { getClassProperties, getClassPropertyType } from "@proteria/metadata";
 
 @annotate
@@ -37,9 +41,20 @@ class DataTable {
 
 function annotate(Class: new (...args: any[]) => any) {
   for (const propertyName of getClassProperties(Class)) {
-    const { typeFactory, nullable } = getClassPropertyType(Class, propertyName);
-    const options = nullable && { nullable };
-    __decorate([Column(typeFactory, options)], Class.prototype, propertyName);
+    const { typeFactory, nullable, value } = getClassPropertyType(
+      Class,
+      propertyName
+    );
+    decorate(
+      [
+        Column(typeFactory, {
+          ...(nullable && { nullable }),
+          ...(value && { default: value }),
+        }),
+      ],
+      Class.prototype,
+      propertyName
+    );
   }
 }
 ```

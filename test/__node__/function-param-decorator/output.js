@@ -50,7 +50,7 @@ class Named {
     (0, _metadata.createType)(() =>
       typeof _graphql.Context === "undefined" ? Object : _graphql.Context
     ),
-    (0, _metadata.createType)(() => Object),
+    (0, _metadata.createType)(_metadata.ObjectType),
   ])
   methodName(args, context, xyz) {}
 }

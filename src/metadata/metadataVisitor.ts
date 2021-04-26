@@ -1,6 +1,4 @@
 import type { NodePath } from "@babel/traverse";
-import type { Type } from "./serializeType";
-import { SerializeType } from "./serializeType";
 import type { TransformContext, t } from "../babel";
 
 function assertNever(_type: never) {}
@@ -39,64 +37,20 @@ function findTypeNode(
   }
 }
 
-function createIsSafeReference(classPath: NodePath<t.ClassDeclaration>) {
-  const className = classPath.node.id?.name ?? "";
-
-  /**
-   * Checks if node (this should be the result of `serializeReference`) member
-   * expression or identifier is a reference to self (class name).
-   * In this case, we just emit `Object` in order to avoid ReferenceError.
-   */
-  return function isClassType(
-    node: t.Expression | t.MemberExpression
-  ): boolean {
-    switch (node.type) {
-      case "Identifier":
-        return node.name === className;
-      case "MemberExpression":
-        return isClassType(node.object);
-      default:
-        return false;
-    }
-  };
-}
-
 export class MetadataVisitor {
   constructor(
     private classPath: NodePath<t.ClassDeclaration>,
-    private context: TransformContext,
-    private serializer = new SerializeType({
-      ...context,
-      isSafeReference: createIsSafeReference(classPath),
-    })
+    private context: TransformContext
   ) {}
 
-  private fromType(
-    { primary, parameters }: Type,
-    optional?: boolean
-  ): t.CallExpression {
-    const { t, ids } = this.context;
-    return t.callExpression(
-      this.context.$createType,
-      [
-        t.arrowFunctionExpression([], primary),
-        parameters && t.arrayExpression(parameters.map(t => this.fromType(t))),
-        optional &&
-          t.objectExpression([
-            t.objectProperty(ids.nullable, t.booleanLiteral(true)),
-          ]),
-      ].filter(Boolean)
-    );
-  }
-
   private *visitClassMethod(node: t.ClassMethod) {
-    const { keys, t, ids, createMetadataDecorator: decorate } = this.context;
+    const { keys, t, ids, decorate, serializer } = this.context;
 
     yield decorate(keys.Type, ids.Function);
 
     const paramTypes = node.params.map(param =>
-      this.fromType(
-        this.serializer.serializeType(findTypeNode(param)),
+      serializer.fromType(
+        serializer.serializeType(findTypeNode(param)),
         ("optional" in param && param.optional) || false
       )
     );
@@ -104,8 +58,8 @@ export class MetadataVisitor {
     yield decorate(keys.ParamType, t.arrayExpression(paramTypes));
 
     if (node.returnType) {
-      const returnType = this.fromType(
-        this.serializer.serializeType(
+      const returnType = serializer.fromType(
+        serializer.serializeType(
           (node.returnType as t.TSTypeAnnotation).typeAnnotation
         )
       );
@@ -115,17 +69,41 @@ export class MetadataVisitor {
   }
 
   private *visitClassProperty(field: t.ClassProperty) {
-    const { keys, createMetadataDecorator: decorate } = this.context;
+    const { keys, decorate, t, serializer } = this.context;
 
-    if (field.typeAnnotation?.type !== "TSTypeAnnotation") {
-      return;
+    let typeNode: t.TSType | undefined;
+    if (field.typeAnnotation) {
+      typeNode = findTypeNode(field);
+    } else {
+      // No explicit type annotation but there is a value assignment,
+      // we try to deduct the type from the value.
+      switch (field.value?.type) {
+        case "StringLiteral":
+          typeNode = t.tsStringKeyword();
+          break;
+        case "NumericLiteral":
+          typeNode = t.tsNumberKeyword();
+          break;
+        case "BooleanLiteral":
+          typeNode = t.tsBooleanKeyword();
+          break;
+        case "BigIntLiteral":
+          typeNode = t.tsTypeReference(t.identifier("BigInt"));
+          break;
+        case "ArrayExpression":
+          typeNode = t.tsTypeReference(t.identifier("Array"));
+          break;
+        default:
+          return;
+      }
     }
 
     yield decorate(
       keys.Type,
-      this.fromType(
-        this.serializer.serializeType(findTypeNode(field)),
-        ("optional" in field && field.optional) || false
+      serializer.fromType(
+        serializer.serializeType(typeNode),
+        ("optional" in field && field.optional) || false,
+        t.isLiteral(field.value) && field.value
       )
     );
   }

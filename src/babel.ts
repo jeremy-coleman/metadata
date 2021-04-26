@@ -10,6 +10,7 @@ import { name } from "../package.json";
 export type BabelAPI = typeof babel & ConfigAPI;
 
 import type * as runtime from "./runtime";
+import { SerializeType } from "./metadata/serializeType";
 type RuntimeExport = keyof typeof runtime;
 
 type DesignTypeKey = keyof typeof DesignType;
@@ -46,16 +47,23 @@ export type types = typeof t;
 export interface TransformContext extends PluginOptions {
   t: types;
   ids: ReturnType<typeof sharedIds>;
-  createMetadataDecorator: (
-    key: t.Expression,
-    arg: t.Expression
-  ) => t.CallExpression;
-  $createType: t.Identifier;
+  decorate: (key: t.Expression, arg: t.Expression) => t.CallExpression;
+  $createType: () => t.Identifier;
   keys: DesignTypeKeys;
+  serializer: SerializeType;
   addDecorator(
     node: { decorators?: t.Decorator[] | null },
     ...decorator: (t.Expression | t.Expression[])[]
   ): void;
+  fixedTypes: {
+    array: () => t.Identifier;
+    string: () => t.Identifier;
+    number: () => t.Identifier;
+    boolean: () => t.Identifier;
+    function: () => t.Identifier;
+    object: () => t.Identifier;
+    symbol: () => t.Identifier;
+  };
 }
 
 const sharedIds = (t: types) => ({
@@ -69,6 +77,7 @@ const sharedIds = (t: types) => ({
   undefined: t.identifier("undefined"),
 
   key: t.identifier("key"),
+  value: t.identifier("value"),
   target: t.identifier("target"),
   nullable: t.identifier("nullable"),
 });
@@ -82,6 +91,8 @@ export default (
   options = { decoratedOnly: false, static: true, ...options };
 
   const Program: VisitNode<PluginPass, t.Program> = programPath => {
+    let importDec: t.ImportDeclaration | undefined;
+
     /**
      * Inserts a named import to the top of the program.
      * @param identifier Importee
@@ -93,17 +104,24 @@ export default (
       suggestedName: string = identifier
     ) => {
       const newID = programPath.scope.generateUidIdentifier(suggestedName);
-      programPath.node.body.unshift(
-        t.importDeclaration(
-          [t.importSpecifier(newID, t.identifier(identifier))],
+      if (!importDec) {
+        importDec = t.importDeclaration(
+          [],
           t.stringLiteral(options.importPath ?? name)
-        )
+        );
+        programPath.node.body.unshift(importDec);
+      }
+
+      importDec.specifiers.push(
+        t.importSpecifier(newID, t.identifier(identifier))
       );
+
       return () => t.cloneNode(newID);
     };
 
     const $createType = getNamedImport("createType", "type");
     const $designType = getNamedImport("DesignType");
+
     const $reflectMetadata = t.memberExpression(id("Reflect"), id("metadata"));
 
     /**
@@ -132,10 +150,8 @@ export default (
     programPath.traverse({
       ClassDeclaration(path) {
         const context: TransformContext = {
-          get $createType() {
-            return $createType();
-          },
-          createMetadataDecorator,
+          $createType,
+          decorate: createMetadataDecorator,
           keys,
           t,
           ids,
@@ -146,7 +162,25 @@ export default (
               ...decorator.flat(2).map(dec => t.decorator(dec))
             );
           },
+          fixedTypes: {
+            array: getNamedImport("ArrayType"),
+            number: getNamedImport("NumberType"),
+            string: getNamedImport("StringType"),
+            boolean: getNamedImport("BooleanType"),
+            object: getNamedImport("ObjectType"),
+            function: getNamedImport("FunctionType"),
+            symbol: getNamedImport("SymbolType"),
+          },
+          serializer: null!,
         };
+
+        const className = path.node.id?.name ?? "";
+        const serializer = new SerializeType({
+          ...context,
+          isSafeReference: node => t.isIdentifier(node, { name: className }),
+        });
+
+        context.serializer = serializer;
 
         const fields = {
           ClassMethod: new Set<string>(),

@@ -1,5 +1,10 @@
-import { DesignType as _DesignType } from "@proteria/metadata";
-import { createType as _type } from "@proteria/metadata";
+import {
+  createType as _type,
+  DesignType as _DesignType,
+  StringType as _StringType3,
+  ObjectType as _ObjectType3,
+  StringType as _StringType4,
+} from "@proteria/metadata";
 
 @Reflect.metadata(_DesignType.PropertyList, [])
 @Reflect.metadata(_DesignType.MethodList, [])
@@ -38,8 +43,8 @@ class MyOtherClass {
   @_decorateArgument4
   @Reflect.metadata(_DesignType.Type, Function)
   @Reflect.metadata(_DesignType.ParamType, [
-    _type(() => String),
-    _type(() => Object),
+    _type(_StringType3),
+    _type(_ObjectType3),
   ])
   methodUndecorated(param, otherParam) {}
 
@@ -81,7 +86,7 @@ class DecoratedClass {
   @decorate("example")
   @_decorateArgument10
   @Reflect.metadata(_DesignType.Type, Function)
-  @Reflect.metadata(_DesignType.ParamType, [_type(() => String)])
+  @Reflect.metadata(_DesignType.ParamType, [_type(_StringType4)])
   method(param) {}
 }
 

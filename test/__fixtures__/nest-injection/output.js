@@ -1,5 +1,8 @@
-import { DesignType as _DesignType } from "@proteria/metadata";
-import { createType as _type } from "@proteria/metadata";
+import {
+  createType as _type,
+  DesignType as _DesignType,
+  StringType as _StringType,
+} from "@proteria/metadata";
 import { AppService } from "./app.service";
 export
 @Controller()
@@ -30,7 +33,7 @@ class AppController {
   @Get()
   @Reflect.metadata(_DesignType.Type, Function)
   @Reflect.metadata(_DesignType.ParamType, [])
-  @Reflect.metadata(_DesignType.ReturnType, _type(() => String))
+  @Reflect.metadata(_DesignType.ReturnType, _type(_StringType))
   getHello() {
     return this.appService.getHello();
   }

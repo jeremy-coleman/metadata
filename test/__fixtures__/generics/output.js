@@ -1,5 +1,11 @@
-import { DesignType as _DesignType } from "@proteria/metadata";
-import { createType as _type } from "@proteria/metadata";
+import {
+  createType as _type,
+  DesignType as _DesignType,
+  ArrayType as _ArrayType,
+  NumberType as _NumberType,
+  StringType as _StringType,
+  SymbolType as _SymbolType,
+} from "@proteria/metadata";
 
 @Decorate
 @Reflect.metadata(_DesignType.Type, Function)
@@ -37,20 +43,20 @@ class MyClass {
       _type(() => (typeof B === "undefined" ? Object : B)),
     ]),
   ])
-  @Reflect.metadata(_DesignType.ReturnType, _type(() => String))
+  @Reflect.metadata(_DesignType.ReturnType, _type(_StringType))
   method(generic, generic2) {}
 
   @Run
   @Reflect.metadata(_DesignType.Type, Function)
   @Reflect.metadata(_DesignType.ParamType, [])
-  @Reflect.metadata(_DesignType.ReturnType, _type(() => Number))
+  @Reflect.metadata(_DesignType.ReturnType, _type(_NumberType))
   method2() {}
 
   @Reflect.metadata(_DesignType.Type, Function)
   @Reflect.metadata(_DesignType.ParamType, [])
   @Reflect.metadata(
     _DesignType.ReturnType,
-    _type(() => Promise, [_type(() => String)])
+    _type(() => Promise, [_type(_StringType)])
   )
   method3() {}
 
@@ -72,15 +78,15 @@ class MyClass {
 
   @Reflect.metadata(
     _DesignType.Type,
-    _type(() => Number, {
+    _type(_NumberType, {
       nullable: true,
     })
   )
   optional;
   @decoratorOrderTest
-  @Reflect.metadata(_DesignType.Type, _type(() => Symbol))
+  @Reflect.metadata(_DesignType.Type, _type(_SymbolType))
   symbol;
-  @Reflect.metadata(_DesignType.Type, _type(() => Array, [_type(() => Number)]))
+  @Reflect.metadata(_DesignType.Type, _type(_ArrayType, [_type(_NumberType)]))
   arrays;
 }
 

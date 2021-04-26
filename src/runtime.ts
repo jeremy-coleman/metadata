@@ -15,6 +15,21 @@ export enum DesignType {
   MethodList = "metadata.method_list",
 }
 
+/** @hidden */
+export const ArrayType = () => Array;
+/** @hidden */
+export const BooleanType = () => Boolean;
+/** @hidden */
+export const FunctionType = () => Function;
+/** @hidden */
+export const NumberType = () => Number;
+/** @hidden */
+export const ObjectType = () => Object;
+/** @hidden */
+export const StringType = () => String;
+/** @hidden */
+export const SymbolType = () => Symbol;
+
 /** @internal */
 export function createType(
   typeFactory: any,
