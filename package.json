@@ -1,6 +1,6 @@
 {
   "name": "@proteria/metadata",
-  "version": "0.3.2",
+  "version": "0.0.1",
   "description": "Babel plugin to emit decorator metadata like typescript compiler",
   "main": "index.js",
   "module": "index.mjs",
@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "docs": "typedoc src/index.ts",
-    "build": "rollup -c && ./scripts/build-package.json.js < package.json > lib/package.json",
+    "build": "rollup -c && ./scripts/build-package.json.js < package.json > lib/package.json && cp README.md lib/",
     "check-types": "tsc --noEmit",
     "release": "yarn test && yarn build && release-it",
     "test": "jest",

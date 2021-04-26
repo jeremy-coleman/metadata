@@ -49,7 +49,7 @@ export function create({
       ...options,
     });
     return {
-      code: format(res.code!, { ...prettier, parser: "babel-ts" }).trim(),
+      code: format(res!.code!, { ...prettier, parser: "babel-ts" }).trim(),
     };
   };
 
@@ -65,8 +65,8 @@ export function create({
       ];
 
       for (const hook of hooks) {
-        if (options[hook] !== undefined) {
-          global[hook](options[hook]);
+        if ((options as any)[hook] !== undefined) {
+          (global as any)[hook]((options as any)[hook]);
         }
       }
     }
@@ -115,7 +115,7 @@ export function create({
       });
   };
 
-  const callback = async (code: string, { filename }) => {
+  const callback = async (code: string, { filename }: { filename: string }) => {
     // We should filter out stack traces from the library
     const stack = ErrorStackParser.parse(new Error())
       .filter(s => s.fileName !== __filename)

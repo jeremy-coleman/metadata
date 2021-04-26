@@ -1,25 +1,4 @@
-import "reflect-metadata";
-import * as babel from "@babel/core";
-
-const _module = { exports: {} };
-
-function javascript(code: TemplateStringsArray) {
-  const source = babel.transform(code.join(""), {
-    presets: [["@babel/preset-typescript", { allExtensions: true }]],
-    plugins: [
-      [require.resolve("../src/babel"), { importPath: "../src/runtime" }],
-      "@babel/plugin-transform-runtime",
-      ["@babel/plugin-proposal-decorators", { legacy: true }],
-      "@babel/plugin-proposal-class-properties",
-      "@babel/plugin-transform-modules-commonjs",
-    ],
-  }).code!;
-
-  eval(/* javascript */ `(function (module, exports) { 
-    ${source} 
-  })(_module, _module.exports)`);
-  return _module.exports as any;
-}
+import { javascript } from "./shared";
 
 describe("emitDecoratorMetadata layer", () => {
   it("extracts correct types", () => {

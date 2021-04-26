@@ -125,6 +125,19 @@ export function getClassPropertyType<T = any>(
   );
 }
 
+/**
+ * Utility function that combines multiple decorators into one.
+ * Decorators will be executed from right to left.
+ */
+export function mergeDecorators<
+  T extends ClassDecorator | PropertyDecorator | MethodDecorator
+>(...decorators: (null | undefined | false | PropertyDecorator)[]): T {
+  return ((...args: any[]) =>
+    decorators
+      .filter(Boolean)
+      .reduceRight((accum, cur: any) => cur(...args), null)) as any;
+}
+
 /** Compatibility: TypeScript compiler converts nullable types to `Object`. */
 const toTSType = (type: TypeInformation) =>
   type.nullable ? Object : type.type;

@@ -1,5 +1,7 @@
 # metadata
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repo-green.svg)](https://github.com/proteriax/metadata) ![Test](https://github.com/proteriax/metadata/actions/workflows/test.yml/badge.svg)
+
 Babel plugin to emit decorator extensive metadata information, similar to TypeScript
 compiler, but supports lazy initialization, circular dependencies, generics
 and optional types.

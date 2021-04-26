@@ -17,5 +17,5 @@
     "strict": true,
     "target": "es2019"
   },
-  "include": ["src/**/*", "src/**/*.json", "package.json"]
+  "include": ["src/**/*", "src/**/*.json", "test/**/*", "package.json"]
 }
