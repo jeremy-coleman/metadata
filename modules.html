@@ -76,6 +76,7 @@
 								<li class="tsd-kind-function"><a href="modules.html#getclassmethods" class="tsd-kind-icon">get<wbr>Class<wbr>Methods</a></li>
 								<li class="tsd-kind-function"><a href="modules.html#getclassproperties" class="tsd-kind-icon">get<wbr>Class<wbr>Properties</a></li>
 								<li class="tsd-kind-function tsd-has-type-parameter"><a href="modules.html#getclasspropertytype" class="tsd-kind-icon">get<wbr>Class<wbr>Property<wbr>Type</a></li>
+								<li class="tsd-kind-function tsd-has-type-parameter"><a href="modules.html#mergedecorators" class="tsd-kind-icon">merge<wbr>Decorators</a></li>
 							</ul>
 						</section>
 					</div>
@@ -93,7 +94,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a330f9f/src/index.ts#L137">index.ts:137</a></li>
+									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a5672cb/src/index.ts#L150">index.ts:150</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -129,7 +130,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a330f9f/src/index.ts#L85">index.ts:85</a></li>
+									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a5672cb/src/index.ts#L85">index.ts:85</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -191,7 +192,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a330f9f/src/index.ts#L101">index.ts:101</a></li>
+									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a5672cb/src/index.ts#L101">index.ts:101</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -252,7 +253,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a330f9f/src/index.ts#L75">index.ts:75</a></li>
+									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a5672cb/src/index.ts#L75">index.ts:75</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -301,7 +302,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a330f9f/src/index.ts#L65">index.ts:65</a></li>
+									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a5672cb/src/index.ts#L65">index.ts:65</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -350,7 +351,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a330f9f/src/index.ts#L117">index.ts:117</a></li>
+									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a5672cb/src/index.ts#L117">index.ts:117</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -401,6 +402,41 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-has-type-parameter">
+					<a name="mergedecorators" class="tsd-anchor"></a>
+					<h3>merge<wbr>Decorators</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">merge<wbr>Decorators&lt;T&gt;<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>decorators<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">PropertyDecorator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/proteriax/metadata/blob/a5672cb/src/index.ts#L132">index.ts:132</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Utility function that combines multiple decorators into one.
+									Decorators will be executed from right to left.</p>
+								</div>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>T<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ClassDecorator</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">PropertyDecorator</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MethodDecorator</span></h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>decorators: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">PropertyDecorator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
+						</li>
+					</ul>
+				</section>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -433,6 +469,9 @@
 					</li>
 					<li class=" tsd-kind-function tsd-has-type-parameter">
 						<a href="modules.html#getclasspropertytype" class="tsd-kind-icon">get<wbr>Class<wbr>Property<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="modules.html#mergedecorators" class="tsd-kind-icon">merge<wbr>Decorators</a>
 					</li>
 				</ul>
 			</nav>
