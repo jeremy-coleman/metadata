@@ -131,7 +131,7 @@ export function getClassPropertyType<T = any>(
  */
 export function mergeDecorators<
   T extends ClassDecorator | PropertyDecorator | MethodDecorator
->(...decorators: (null | undefined | false | PropertyDecorator)[]): T {
+>(...decorators: (null | undefined | false | T)[]): T {
   return ((...args: any[]) =>
     decorators
       .filter(Boolean)

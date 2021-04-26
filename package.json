@@ -1,6 +1,6 @@
 {
   "name": "@proteria/metadata",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Babel plugin to emit decorator metadata like typescript compiler",
   "main": "index.js",
   "module": "index.mjs",
