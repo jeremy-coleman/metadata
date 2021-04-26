@@ -2658,3 +2658,64 @@ input[type=checkbox]:checked + .tsd-widget:before {
 img {
   max-width: 100%;
 }
+@media (prefers-color-scheme: dark) {
+  body {
+    --color-background: #121212;
+    --color-panel: #151515;
+    --color-panel-divider: #222;
+    --color-toolbar: #151515;
+    --color-text: #ddd;
+    --color-toolbar-text: #ccc;
+  }
+
+  .tsd-select .tsd-select-list li:before,
+.tsd-select .tsd-select-label:before,
+.tsd-widget:before {
+    filter: invert(1);
+  }
+
+  .language-json span[style^="color: #000000" i],
+.language-ts span[style^="color: #000000" i] {
+    color: #f2f0ed !important;
+  }
+
+  .language-json span[style^="color: #0000ff" i],
+.language-ts span[style^="color: #0000ff" i] {
+    color: #2b7dff !important;
+  }
+
+  .language-json span[style^="color: #001080" i],
+.language-ts span[style^="color: #001080" i] {
+    color: #7fb9ff !important;
+  }
+
+  .language-json span[style^="color: #0070c1" i],
+.language-ts span[style^="color: #0070c1" i] {
+    color: #54bfff !important;
+  }
+
+  .language-json span[style^="color: #267f99" i],
+.language-ts span[style^="color: #267f99" i] {
+    color: #69c8e3 !important;
+  }
+
+  .language-json span[style^="color: #795e26" i],
+.language-ts span[style^="color: #795e26" i] {
+    color: #e1c383 !important;
+  }
+
+  .language-json span[style^="color: #af00db" i],
+.language-ts span[style^="color: #af00db" i] {
+    color: #df2bff !important;
+  }
+
+  .language-json span[style^="color: #a31515" i],
+.language-ts span[style^="color: #a31515" i] {
+    color: #f55d5d !important;
+  }
+
+  .language-json span[style^="color: #0451a5" i],
+.language-ts span[style^="color: #0451a5" i] {
+    color: #68bfff !important;
+  }
+}
