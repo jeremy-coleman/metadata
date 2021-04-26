@@ -4,7 +4,9 @@ describe("mergeDecorators", () => {
   it("merges decorators correctly", () => {
     const classRecord: number[] = [];
 
-    const add = <T>(array: T[], value: T) => () => array.push(value);
+    const add = <T>(array: T[], value: T) => () => {
+      array.push(value);
+    };
 
     @mergeDecorators<ClassDecorator>(
       add(classRecord, 1),
