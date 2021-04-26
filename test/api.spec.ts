@@ -23,13 +23,13 @@ describe("API specification", () => {
   });
 
   it("accepts either an instance or class constructor", () => {
-    const { Class, instance } = javascript`
+    const { Class } = javascript`
       export class Class {
         field!: string;
       }
       export const instance = new Class();
     `;
-    expect(getClassPropertyType(instance, "field").type).toBe(String);
+    expect(getClassPropertyType(Class.prototype, "field").type).toBe(String);
     expect(getClassPropertyType(Class, "field").type).toBe(String);
   });
 });

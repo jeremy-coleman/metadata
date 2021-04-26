@@ -59,9 +59,7 @@ type OmitKeyBy<T, Condition> = {
 }[keyof T];
 
 const getPrototype = <T>(target: (new (...args: any[]) => T) | T): T =>
-  typeof target === "function"
-    ? target.prototype
-    : Object.getPrototypeOf(target);
+  typeof target === "function" ? target.prototype : target;
 
 /**
  * Returns a list of class property names.
@@ -83,7 +81,7 @@ export function getClassMethods(Class: new (...args: any[]) => any): string[] {
 
 /**
  * Returns a list of arguments with their types of a given method of a Class.
- * @param target Instance or class constructor
+ * @param target Prototype object or class constructor
  * @param key Method name
  */
 export function getClassMethodArguments<T = any>(
@@ -99,7 +97,7 @@ export function getClassMethodArguments<T = any>(
 
 /**
  * Returns the return type information of a given method of a Class.
- * @param target Instance or class constructor
+ * @param target Prototype object or class constructor
  * @param key Method name
  */
 export function getClassMethodReturnType<T = any>(
@@ -115,7 +113,7 @@ export function getClassMethodReturnType<T = any>(
 
 /**
  * Returns the type information of a class property.
- * @param target Instance or class constructor
+ * @param target Prototype object or class constructor
  * @param key Property name
  */
 export function getClassPropertyType<T = any>(
