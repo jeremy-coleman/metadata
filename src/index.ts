@@ -58,6 +58,11 @@ type OmitKeyBy<T, Condition> = {
   [key in keyof T]: T[key] extends Condition ? never : key;
 }[keyof T];
 
+const getPrototype = <T>(target: (new (...args: any[]) => T) | T): T =>
+  typeof target === "function"
+    ? target.prototype
+    : Object.getPrototypeOf(target);
+
 /**
  * Returns a list of class property names.
  * @param Class Class constructor
@@ -77,50 +82,49 @@ export function getClassMethods(Class: new (...args: any[]) => any): string[] {
 }
 
 /**
- * Returns a list of arguments with their types of a
- * given method of a Class.
- * @param Class Class constructor
+ * Returns a list of arguments with their types of a given method of a Class.
+ * @param target Instance or class constructor
  * @param key Method name
  */
 export function getClassMethodArguments<T = any>(
-  Class: new (...args: any[]) => T,
+  target: (new (...args: any[]) => T) | T,
   key: PickKeyBy<T, Function>
 ): TypeInformation[] {
   return Reflect.getMetadata(
     DesignType.ParamType,
-    Class.prototype,
+    getPrototype(target),
     key as string | symbol
   );
 }
 
 /**
  * Returns the return type information of a given method of a Class.
- * @param Class Class constructor
+ * @param target Instance or class constructor
  * @param key Method name
  */
 export function getClassMethodReturnType<T = any>(
-  Class: new (...args: any[]) => T,
+  target: (new (...args: any[]) => T) | T,
   key: PickKeyBy<T, Function>
 ): TypeInformation {
   return Reflect.getMetadata(
     DesignType.ReturnType,
-    Class.prototype,
+    getPrototype(target),
     key as string | symbol
   );
 }
 
 /**
  * Returns the type information of a class property.
- * @param Class Class constructor
+ * @param target Instance or class constructor
  * @param key Property name
  */
 export function getClassPropertyType<T = any>(
-  Class: new (...args: any[]) => T,
+  target: (new (...args: any[]) => T) | T,
   key: OmitKeyBy<T, Function>
 ): TypeInformation {
   return Reflect.getMetadata(
     DesignType.Type,
-    Class.prototype,
+    getPrototype(target),
     key as string | symbol
   );
 }

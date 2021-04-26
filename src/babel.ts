@@ -21,7 +21,7 @@ export interface PluginOptions {
   // functions?: boolean;
   /**
    * Only emit metadata for class methods and class properties already
-   * having at least one decorator
+   * having at least one decorator.
    */
   decoratedOnly?: boolean;
 

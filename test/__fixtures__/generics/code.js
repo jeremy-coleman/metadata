@@ -20,5 +20,8 @@ class MyClass {
 
   optional?: number
 
+  @decoratorOrderTest
+  symbol: symbol
+
   arrays: number[]
 }

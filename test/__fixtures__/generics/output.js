@@ -12,7 +12,7 @@ import { createType as _type } from "@proteria/metadata";
     _type(() => (typeof B === "undefined" ? Object : B)),
   ]),
 ])
-@Reflect.metadata(_DesignType.PropertyList, ["optional", "arrays"])
+@Reflect.metadata(_DesignType.PropertyList, ["optional", "symbol", "arrays"])
 @Reflect.metadata(_DesignType.MethodList, [
   "generic",
   "method",
@@ -77,6 +77,9 @@ class MyClass {
     })
   )
   optional;
+  @decoratorOrderTest
+  @Reflect.metadata(_DesignType.Type, _type(() => Symbol))
+  symbol;
   @Reflect.metadata(_DesignType.Type, _type(() => Array, [_type(() => Number)]))
   arrays;
 }

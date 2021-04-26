@@ -1,6 +1,7 @@
-import { mergeDecorators } from "../src/index";
+import { mergeDecorators, getClassPropertyType } from "../src/index";
+import { javascript } from "./shared";
 
-describe("mergeDecorators", () => {
+describe("API specification", () => {
   it("merges decorators correctly", () => {
     const classRecord: number[] = [];
 
@@ -19,5 +20,16 @@ describe("mergeDecorators", () => {
     Object(Class);
 
     expect(classRecord).toEqual([3, 2, 1]);
+  });
+
+  it("accepts either an instance or class constructor", () => {
+    const { Class, instance } = javascript`
+      export class Class {
+        field!: string;
+      }
+      export const instance = new Class();
+    `;
+    expect(getClassPropertyType(instance, "field").type).toBe(String);
+    expect(getClassPropertyType(Class, "field").type).toBe(String);
   });
 });
